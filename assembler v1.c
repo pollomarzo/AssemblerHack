@@ -2,12 +2,14 @@
 #include <string.h>
 #include <stdlib.h>
 
+const int lung = lung;
+
 typedef struct s_command {
   char command_type;
-  char symbol[20];
-  char dest[20];
-  char comp[20];
-  char jump[20];
+  char symbol[lung];
+  char dest[lung];
+  char comp[lung];
+  char jump[lung];
 } command;
 
 void remove_space(char *d, const char *s) {
@@ -19,10 +21,10 @@ void remove_space(char *d, const char *s) {
   *d = *s;
 }
 
-void remove_comment(char str[20]) {
+void remove_comment(char str[lung]) {
   char c = '/';
   int i=0;
-  while (i < 20) {
+  while (i < lung) {
     if (str[i] == c)
       str[i] = '\0';
     i = i + 1;
@@ -30,7 +32,7 @@ void remove_comment(char str[20]) {
 }
 
 command *parser(char *str) {
-  char nospace[19];
+  char nospace[lung];
   remove_space(nospace, str);
   //puts(nospace);
   nospace[18] = '\n';
@@ -45,9 +47,9 @@ command *parser(char *str) {
 int main(int argc, char **argv) {
   FILE *filein;
   command *current;
-  char instr[20]={'\0'};
+  char instr[lung]={'\0'};
   filein = fopen(argv[1], "r");
-  fgets(instr, 18, filein);
+  fgets(instr, lung, filein);
   //instr[19]='\0';
   current = parser(instr);
   //puts(current->command_type);
