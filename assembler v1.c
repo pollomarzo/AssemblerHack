@@ -37,7 +37,7 @@ command *parser(char *str) {
   //puts(nospace);
   nospace[18] = '\n';
   remove_comment(nospace);
-  puts(nospace);
+  fputs(nospace);
   command *current_parse = malloc(sizeof(command));
   current_parse->command_type = 'a';
   strcpy(current_parse->symbol, nospace);
@@ -50,9 +50,6 @@ int main(int argc, char **argv) {
   char instr[lung]={'\0'};
   filein = fopen(argv[1], "r");
   fgets(instr, lung, filein);
-  //instr[19]='\0';
   current = parser(instr);
-  //puts(current->command_type);
- // puts(current->symbol);
   return 0;
 }
