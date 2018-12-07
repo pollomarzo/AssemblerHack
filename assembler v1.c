@@ -6,9 +6,9 @@
 typedef struct s_command {
   char command_type;
   char symbol[20];
-  char dest[3];
-  char comp[7];
-  char jump[3];
+  char dest[4];
+  char comp[8];
+  char jump[4];
   char instruction[17];
 } command;
 
@@ -63,7 +63,7 @@ void traduci_comp(char *nospace, command *current_parse){
         }
     }else if(nospace[1]=='-'){
         if(nospace[2]=='1'){
-            strcpy(current_parse->comp,"00001110");
+            strcpy(current_parse->comp,"0001110");
         }
         if(nospace[2]=='A'){
             strcpy(current_parse->comp,"0000011");
@@ -183,14 +183,16 @@ int isin(char *c, const char d){
 }
 
 void translate(char *nospace, command *current_parse){
-  char y[3]={'1','1','1'};
-  strcpy(current_parse->dest,"000");
-  strcpy(current_parse->jump,"000");
+
   char x='\0'; //if x=d only dest and comp; if x=j only comp and j; if x=l dest,comp,jump
   if (isin(nospace,'=')&&(1-isin(nospace,';'))) x='d';
   else if ((1-(isin(nospace, '='))) && (isin(nospace, ';'))) x='j';
   else if ((isin(nospace, '=')) && (isin(nospace, ';'))) x='l';
   
+  char y[4]={'1','1','1','\0'};
+  strcpy(current_parse->dest,"000");
+  strcpy(current_parse->jump,"000");
+
   if(x=='d') {
     traduci_dest(nospace,current_parse);
     while(*nospace!='=') nospace++;
@@ -216,52 +218,82 @@ void translate(char *nospace, command *current_parse){
     nospace++;
     traduci_jump(nospace,current_parse);
   }
-  /*
   strcat(current_parse->instruction, y);
   strcat(current_parse->instruction, current_parse->comp);
   strcat(current_parse->instruction, current_parse->dest);
   strcat(current_parse->instruction, current_parse->jump);
   current_parse->instruction[16]='\0';
-  */
+  
+}
+
+void translateA(command *p){
+    char x[17];
+    int i=15;
+    int b=0;
+    while(i<strlen(p->symbol)){
+        if(p->symbol[i]>='0' && p->symbol[i]<='9'){
+        } else b=1;
+        i = i +1;
+    }
+    if (b==0) {
+      
+      int n = atoi(p->symbol);
+      while (n > 0)
+      {
+        if (n % 2 == 0)
+          x[i] = '0';
+        else
+          x[i] = '1';
+        n = n / 2;
+        i--;
+        }
+        while(i>=0){
+            x[i] = '0';
+            i--;
+        }
+    }
+    strcpy(p->instruction, x);
 }
 
 command *filler(char *nospace, command* current_parse){
   int i = 1;
-  //puts(current_parse->comp);
   if (nospace[0]=='@') current_parse->command_type = 'A';
   else if (nospace[0]=='(') current_parse->command_type = 'L';
   else current_parse->command_type = 'C'; //TODO: insert error message if nospace[0] isnt known
   
-  if (current_parse->command_type=='A') strcpy(current_parse->symbol,++nospace); //{while(nospace[i]!='\0') current_parse->symbol=nospace[i]; i++;}
+  if (current_parse->command_type=='A') {
+      strcpy(current_parse->symbol,++nospace);
+      translateA(current_parse);
+  }
   else if (current_parse->command_type=='C') translate(nospace,current_parse);
   else if (current_parse->command_type=='L') {}
 }
-
-
 
 command *parser(char *str) {
   char nospace[20];
   command *current_parse = malloc(sizeof(command));
   remove_space(nospace, str);
-  //puts(nospace);
-  nospace[18] = '\n';
   remove_comment(nospace);
   //fputs(nospace);
   filler(nospace,current_parse);
-  puts(current_parse->comp);/*
-  puts(current_parse->dest);
-  puts(current_parse->jump);
-  puts(current_parse->instruction);*/
   return current_parse;
 }
 
 int main(int argc, char **argv) {
-  FILE *filein;
+  FILE *filein, *fileout;
   command *current;
   char instr[20]={'\0'};
   filein = fopen(argv[1], "r");
+  fileout = fopen(argv[2], "w");
   //while con fgets e le righe in una lista
-  fgets(instr, 20, filein);
-  current = parser(instr);
+  while(!feof(filein)){
+      while(fgets(instr, sizeof(instr), filein)){
+      current = parser(instr);
+      printf("%s", current->instruction);
+      //fprintf(fileout, "%s", current->instruction);
+      //fprintf(fileout, "%c", '\n');
+  }}
+  fclose(filein);
+  fclose(fileout);
   return (0);
 }
