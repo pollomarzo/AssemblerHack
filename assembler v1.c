@@ -39,7 +39,6 @@ void traduci_comp(char *nospace, command *current_parse){
     else if (nospace[1]=='D') strcpy(current_parse->comp,"0001111");
     else if (nospace[1]=='M') strcpy(current_parse->comp,"1110011");
   }
-  if(nospace[0]=='D')
   if(nospace[0]=='A'){
     if(nospace[1]=='+') {
       if(nospace[2]=='1') strcpy(current_parse->comp,"1110111");
