@@ -6,9 +6,10 @@
 typedef struct s_command {
   char command_type;
   char symbol[20];
-  char dest[20];
-  char comp[20];
-  char jump[20];
+  char dest[3];
+  char comp[7];
+  char jump[3];
+  char instruction[17];
 } command;
 
 void remove_space(char *d, const char *s) {
@@ -182,9 +183,12 @@ int isin(char *c, const char d){
 }
 
 void translate(char *nospace, command *current_parse){
+  char y[3]={'1','1','1'};
+  strcpy(current_parse->dest,"000");
+  strcpy(current_parse->jump,"000");
   char x='\0'; //if x=d only dest and comp; if x=j only comp and j; if x=l dest,comp,jump
-  if (isin(nospace,'=')&&(!isin(nospace,';'))) x='d';
-  else if (!(isin(nospace, '=')) && (isin(nospace, ';'))) x='j';
+  if (isin(nospace,'=')&&(1-isin(nospace,';'))) x='d';
+  else if ((1-(isin(nospace, '='))) && (isin(nospace, ';'))) x='j';
   else if ((isin(nospace, '=')) && (isin(nospace, ';'))) x='l';
   
   if(x=='d') {
@@ -192,6 +196,7 @@ void translate(char *nospace, command *current_parse){
     while(*nospace!='=') nospace++;
     nospace++;
     traduci_comp(nospace,current_parse);
+
     }
   
   if(x=='j') {
@@ -209,9 +214,15 @@ void translate(char *nospace, command *current_parse){
 
     while(*nospace!=';') nospace++;
     nospace++;
-    traduci_jump(nospace,current_parse); 
+    traduci_jump(nospace,current_parse);
   }
-
+  /*
+  strcat(current_parse->instruction, y);
+  strcat(current_parse->instruction, current_parse->comp);
+  strcat(current_parse->instruction, current_parse->dest);
+  strcat(current_parse->instruction, current_parse->jump);
+  current_parse->instruction[16]='\0';
+  */
 }
 
 command *filler(char *nospace, command* current_parse){
@@ -226,6 +237,8 @@ command *filler(char *nospace, command* current_parse){
   else if (current_parse->command_type=='L') {}
 }
 
+
+
 command *parser(char *str) {
   char nospace[20];
   command *current_parse = malloc(sizeof(command));
@@ -235,7 +248,10 @@ command *parser(char *str) {
   remove_comment(nospace);
   //fputs(nospace);
   filler(nospace,current_parse);
-  puts(current_parse->symbol);
+  puts(current_parse->comp);/*
+  puts(current_parse->dest);
+  puts(current_parse->jump);
+  puts(current_parse->instruction);*/
   return current_parse;
 }
 
@@ -247,5 +263,5 @@ int main(int argc, char **argv) {
   //while con fgets e le righe in una lista
   fgets(instr, 20, filein);
   current = parser(instr);
-  return 0;
+  return (0);
 }

@@ -1,2 +1,1 @@
-@  giovanna /culo
-D=A
+D=A;JMP
