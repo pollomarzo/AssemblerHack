@@ -42,13 +42,13 @@ void traduci_comp(char *nospace, command *current_parse){
   }
   if(nospace[0]=='A'){
     if(nospace[1]=='+') {
-      if(nospace[2]=='1') strcpy(current_parse->comp,"1110111");
+      if(nospace[2]=='1') strcpy(current_parse->comp,"0110111");
     }
     else if (nospace[1]=='-'){
-      if (nospace[2]=='1') strcpy(current_parse->comp,"1110010");
-      else if (nospace[2]=='D') strcpy(current_parse->comp,"1000011");
+      if (nospace[2]=='1') strcpy(current_parse->comp,"0110010");
+      else if (nospace[2]=='D') strcpy(current_parse->comp,"0000011");
     }
-    else strcpy(current_parse->comp,"1110000");
+    else strcpy(current_parse->comp,"0110000");
   }
   if(nospace[0]=='D'){
     if(nospace[1]=='+'){
@@ -175,7 +175,7 @@ void traduci_jump(char *nospace, command *current_parse){
 }
 
 int isin(char *c, const char d){
-  while(c!=NULL){
+  while(*c!='\0'){
     if( *c==d) return 1;
     else c++;
   }
@@ -286,13 +286,12 @@ int main(int argc, char **argv) {
   filein = fopen(argv[1], "r");
   fileout = fopen(argv[2], "w");
   //while con fgets e le righe in una lista
-  while(!feof(filein)){
-      while(fgets(instr, sizeof(instr), filein)){
+  while(fgets(instr, sizeof(instr), filein)!=NULL){
       current = parser(instr);
-      printf("%s", current->instruction);
+      fprintf(fileout, "%s\n", current->instruction);
       //fprintf(fileout, "%s", current->instruction);
       //fprintf(fileout, "%c", '\n');
-  }}
+  }
   fclose(filein);
   fclose(fileout);
   return (0);
