@@ -21,7 +21,7 @@ void remove_space(char *d, const char *s) {
   *d = *s;
 }
 
-void remove_comment(char str[20]) {
+void remove_comment(char str[200]) {
   char c = '/';
   int i=0;
   while (i < 20) {
@@ -247,10 +247,11 @@ void translateA(command *p){
         n = n / 2;
         i--;
         }
-        while(i>=0){
+        while(i>0){
             x[i] = '0';
             i--;
         }
+        x[i]='0';
     }
     strcpy(p->instruction, x);
 }
@@ -270,10 +271,13 @@ command *filler(char *nospace, command* current_parse){
 }
 
 command *parser(char *str) {
-  char nospace[20];
+  char nospace[200];
   command *current_parse = malloc(sizeof(command));
+  command *trash = malloc(sizeof(command));
+  trash->instruction[0]='c';
   remove_space(nospace, str);
   remove_comment(nospace);
+  if (nospace[0]=='\0'||nospace[0]=='\n') return trash;
   //fputs(nospace);
   filler(nospace,current_parse);
   return current_parse;
@@ -282,13 +286,15 @@ command *parser(char *str) {
 int main(int argc, char **argv) {
   FILE *filein, *fileout;
   command *current;
-  char instr[20]={'\0'};
+  char instr[200]={'\0'};
   filein = fopen(argv[1], "r");
   fileout = fopen(argv[2], "w");
   //while con fgets e le righe in una lista
   while(fgets(instr, sizeof(instr), filein)!=NULL){
       current = parser(instr);
+      if (current->instruction[0]!='c'){
       fprintf(fileout, "%s\n", current->instruction);
+      }
       //fprintf(fileout, "%s", current->instruction);
       //fprintf(fileout, "%c", '\n');
   }
