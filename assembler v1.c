@@ -289,7 +289,6 @@ int main(int argc, char **argv) {
   char instr[200]={'\0'};
   filein = fopen(argv[1], "r");
   fileout = fopen(argv[2], "w");
-  //while con fgets e le righe in una lista
   while(fgets(instr, sizeof(instr), filein)!=NULL){
       current = parser(instr);
       if (current->instruction[0]!='c'){
