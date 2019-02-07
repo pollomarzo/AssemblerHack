@@ -230,11 +230,9 @@ void translateA(command *p){
     char x[17];
     int i=15;
     int b=0;
-    while(i<strlen(p->symbol)){
-        if(p->symbol[i]>='0' && p->symbol[i]<='9'){
-        } else b=1;
-        i = i +1;
-    }
+    if(p->symbol[0]>='0' && p->symbol[0]<='9'){
+       } else b=1;
+    
     if (b==0) {
       
       int n = atoi(p->symbol);
