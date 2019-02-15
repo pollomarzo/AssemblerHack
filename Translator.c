@@ -2,6 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "stack.h"
+#include "command.h"
+
 /*
 -> Cose da fare:
   ~> implementazione stack
@@ -11,6 +14,7 @@
     => remove comments and remove spaces
   ~> STACK.c:
     => push
+-> Problemi
 */
 
 int main(int argc, char **argv){
