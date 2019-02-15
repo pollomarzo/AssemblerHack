@@ -13,24 +13,91 @@ typedef struct s_command {
   char instruction[17];
 } command;
 
-/*typedef struct t_symbol{
-  char label[30];
+typedef struct symbols{
+  char label[50];
   int number;
-} symbol_table;
+} symb;
 
-void add_symbol (char *nospace, int riga, symbol_table table){
+typedef struct t_symbol{
+  symb symbol_table[2000];
+  int length;
+  int variable;
+} table;
 
-}*/
+//SEARCH SYMBOL
+//ricerca simbolo nella symbol table
+int search_symbol (char* symbol, symb* s){
+  for (;strcmp(s->label, "END_OF_SYMBOL_TABLE") != 0; s++){         //finchè non arrivo alla fine del array
+    if (strcmp(s->label, symbol) == 0)                              //Se label corrisponde allora ritorna numero
+      return s->number;
+  }
 
+  return -1;                                                        //ritorna num negativo (non ho trovato la stringa)
+}
+
+//ADD SYMBOL
+//aggiunge i simboli alla symbol table
+void add_symbol (char* nospace, int num, symb* s){
+  if (nospace[0]=='('){                                           //if per permettere il riutilizzo della funzione
+    nospace++;
+
+    //calcolo la lunghezza per pulire adeguatamente la stringa
+    int length = strlen(nospace);
+    while(nospace[length - 1] != ')')
+      length--;
+    length--;
+
+    strncpy(s->label, nospace, length);         //copio la label senza ')' applico -3 perché alla pos: strlen(nospace)-1 == '\0', strlen(nospace)-2 == '\n', strlen(nospace)-3 == ')'
+  }
+  else
+    strcpy(s->label, nospace);                                //copio label
+
+  s->number = num;                                            //copio il numero
+}
+
+//INIZIALIZE SYMBOL TABLE
+//inizializza la symbol table
+symb* inizialize_symbol_table(symb* st){
+  add_symbol ("R0", 0, st++);
+  add_symbol ("R1", 1, st++);
+  add_symbol ("R2", 2, st++);
+  add_symbol ("R3", 3, st++);
+  add_symbol ("R4", 4, st++);
+  add_symbol ("R5", 5, st++);
+  add_symbol ("R6", 6, st++);
+  add_symbol ("R7", 7, st++);
+  add_symbol ("R8", 8, st++);
+  add_symbol ("R9", 9, st++);
+  add_symbol ("R10", 10, st++);
+  add_symbol ("R11", 11, st++);
+  add_symbol ("R12", 12, st++);
+  add_symbol ("R13", 13, st++);
+  add_symbol ("R14", 14, st++);
+  add_symbol ("R15", 15, st++);
+  add_symbol ("SCREEN", 16384, st++);
+  add_symbol ("KBD", 24576, st++);
+  add_symbol ("SP", 0, st++);
+  add_symbol ("LCL", 1, st++);
+  add_symbol ("ARG", 2, st++);
+  add_symbol ("THIS", 3, st++);
+  add_symbol ("THAT", 4, st++);
+
+  return st;
+}
+
+//REMOVE SPACES
+//rimuove gli spazi
 void remove_space(char *d, const char *s) {
   for (; *s; ++s) {
-    if (*s != ' ')
+    if (*s != ' ' && *s != '\r')
       *d++ = *s;
   }
 
   *d = *s;
 }
 
+//REMOVE COMMENTS
+//rimuove i commenti
 void remove_comment(char str[200]) {
   char c = '/';
   int i=0;
@@ -41,7 +108,9 @@ void remove_comment(char str[200]) {
   }
 }
 
-void traduci_comp(char *nospace, command *current_parse){
+//TRADUCI COMP
+//traduce in bits le operazioni
+void traduci_comp(char* nospace, command* current_parse){
   //0
   if(nospace[0]=='0')
     strcpy(current_parse->comp,"0101010");
@@ -157,10 +226,9 @@ void traduci_comp(char *nospace, command *current_parse){
   }
 }
 
-void traduci_dest(char *nospace, command *current_parse){
-    /*if(nospace[0] == 'n'  && nospace[1]== 'u' && nospace[2] == 'l' && nospace[3] == 'l'){     non può esserci la scritta "null"
-      strcpy(current_parse->dest, "000");
-    }*/
+//TRADUCI DEST
+//traduce in bits i destinatari
+void traduci_dest(char* nospace, command* current_parse){
     int pos = 0;
 
     if(nospace[pos]=='A'){
@@ -175,45 +243,11 @@ void traduci_dest(char *nospace, command *current_parse){
 
     if(nospace[pos]=='D')
         current_parse->dest[1] = '1';
-
-
-
-    /*
-    if(nospace[0]=='M'){
-        if(nospace[1] == 'D'){
-            strcpy(current_parse->dest,"011");
-        }
-        else {
-            strcpy(current_parse->dest,"001");
-        }
-    }
-
-    if(nospace[0]=='D'){
-        strcpy(current_parse->dest,"010");
-    }
-
-    if(nospace[0]=='A'){
-        if(nospace[1]=='M'){
-            if(nospace[2]=='D'){
-                strcpy(current_parse->dest,"111");
-            }
-            else {
-                strcpy(current_parse->dest,"101");
-            }
-        }
-        else if(nospace[1]=='D'){
-            strcpy(current_parse->dest,"110");
-        }
-        else{
-            strcpy(current_parse->dest,"100");
-        }
-    }*/
 }
 
-void traduci_jump(char *nospace, command *current_parse){
-  /*if(nospace[0] == 'n'  && nospace[1]== 'u' && nospace[2] == 'l' && nospace[3] == 'l'){     non può esserci la scritta "null"
-    strcpy(current_parse->jump, "000");
-  }*/
+//TRADUCI JUMP
+//traduzione in bits dei jump                 TODO:ottimizzazione
+void traduci_jump(char* nospace, command* current_parse){
 
   if(nospace[0] == 'J'){
     if(nospace[1]=='G'){
@@ -243,7 +277,9 @@ void traduci_jump(char *nospace, command *current_parse){
   }
 }
 
-int isin(char *c, const char d){
+//ISIN
+//controllo presenza carattere in una stringa
+int isin(char* c, const char d){
   while(*c!='\0'){
     if( *c==d) return 1;
     else c++;
@@ -253,58 +289,20 @@ int isin(char *c, const char d){
 
 //TRASLATE C
 //assemblaggio c-istr                       CHANGE
-void translate(char *nospace, command *current_parse){
-  //char x='\0'; //if x=d only dest and comp; if x=j only comp and j; if x=l dest,comp,jump
-
+void translate(char* nospace, command* current_parse){
   int dj = isin(nospace, '=') + isin(nospace, ';') * 10;      //se d -> 1; se j -> 10; se d&j -> 11;          CHANGE
                                                               //comp sempre presente
-
-  /*if (isin(nospace,'=')&&(1-isin(nospace,';')))
-    x='d';
-  else if ((1-(isin(nospace, '='))) && (isin(nospace, ';')))
-    x='j';
-  else if ((isin(nospace, '=')) && (isin(nospace, ';')))
-    x='l';*/
 
   char y[4]={'1','1','1','\0'};                   //i 3 bit identificativi della c-instr
   strcpy(current_parse->dest,"000");              //considero inizialmente NULL
   strcpy(current_parse->jump,"000");              //considero inizialmente NULL
 
-  /*if(x=='d') {
-    traduci_dest(nospace,current_parse);
-    while(*nospace!='=') nospace++;
-    nospace++;
-    traduci_comp(nospace,current_parse);
-
-    }
-
-  if(x=='j') {
-    traduci_comp(nospace,current_parse);
-    while(*nospace!=';') nospace++;
-    nospace++;
-    traduci_jump(nospace,current_parse);
-  }
-
-  if(x=='l') {
-    traduci_dest(nospace,current_parse);
-    while(*nospace!='=') nospace++;
-    nospace++;
-    traduci_comp(nospace,current_parse);
-
-    while(*nospace!=';') nospace++;
-    nospace++;
-    traduci_jump(nospace,current_parse);
-  }*/
-
   //CHANGE
   if(dj%10) {                                  //Se dest presente
     traduci_dest(nospace,current_parse);      //traduzione dest
-    while(*nospace!='='){
-      printf("%c", nospace[0]);
+    while(*nospace!='=')
       nospace++;           //mi sposto fino alla parte comp
-    }
     nospace++;
-    printf("\n");
   }
 
   traduci_comp(nospace,current_parse);        //traduzione comp
@@ -318,101 +316,97 @@ void translate(char *nospace, command *current_parse){
 
   //assemblo l'istruzione
   strcat(current_parse->instruction, y);
-  printf("Comp: %s\n", current_parse->comp);
   strcat(current_parse->instruction, current_parse->comp);
-  printf("Dest: %s\n", current_parse->dest);
   strcat(current_parse->instruction, current_parse->dest);
-  printf("Jump: %s\n", current_parse->jump);
   strcat(current_parse->instruction, current_parse->jump);
 
-  current_parse->instruction[16]='\0';
+  current_parse->instruction[16]='\0';          //pulisco la stringa
 }
 
 //TRANSLATE A
-//traduzione in A-instr                     CHANGE
-void translateA(command *p){
-    char x[17];                                           //variabile temporanea in cui salvo l'istruzione booleano
+//traduzione in A-instr
+void translateA(FILE *fileout, command* p, table* t){
+    char x[17];                                           //variabile temporanea in cui salvo l'istruzione binaria
     int b=0;                                              //booleano
 
     if(!(p->symbol[0]>='0' && p->symbol[0]<='9'))         //segnalo se è numero o simbolo (1 = simbolo, 0 = numero)
       b=1;
 
-    /*
-    Serve per capire se è un simbolo o un numero.
-    while(i<strlen(p->symbol)){
-        if(p->symbol[i]>='0' && p->symbol[i]<='9'){
-        } else b=1;
-        i = i +1;
-    }
-    */
-
-    //se numero
-    if (b==0) {
-      int i = 15;
-      int n = atoi(p->symbol);
-      //calcolo valore binario e salvo in x
-      while (n > 0)
-      {
-        if (n % 2 == 0)
-          x[i] = '0';
-        else
-          x[i] = '1';
-        n = n / 2;
-        i--;
-      }
-
-      //aggiungo gli zeri
-      while(i>0){
-          x[i] = '0';
-          i--;
-      }
-
-      x[i]='0';
-    }
+    int n = -1;
+    if (b==0)
+      n = atoi(p->symbol);              //se numero
     else{
-      //TODO: se simbolo (Cerco in symbol table)
+      n = search_symbol(p->symbol, t->symbol_table);      //se simbolo
+
+      //Se variabile
+      if (n == -1){
+        add_symbol (p->symbol, t->variable, &t->symbol_table[t->length]);         //aggiunta variabile
+
+        n = t->variable;                                                          //trovo il numero corrispondente
+        t->variable++;
+        t->length++;
+
+        add_symbol("END_OF_SYMBOL_TABLE", -1, &t->symbol_table[t->length]);
+      }
     }
+
+    //calcolo valore binario e salvo in x
+    int i = 15;
+    while (n > 0)
+    {
+      if (n % 2 == 0)
+      x[i] = '0';
+      else
+      x[i] = '1';
+      n = n / 2;
+      i--;
+    }
+
+    //aggiungo gli zeri
+    while(i>0){
+      x[i] = '0';
+      i--;
+    }
+
+    x[i]='0';
+    x[16] = '\0';                   //pulisco stringa
 
     strcpy(p->instruction, x);      //copio nell'istruzione vera e propria
 }
 
 //FILLER
 //serve per comprendere se un comando è A-instr, C-instr o Etichetta e agisce di conseguenza.
-command *filler(char *nospace, command* current_parse){
+command* filler(FILE *fileout, char* nospace, command* current_parse, table* t){
   //capisco quale dellle 3 possibilità è
   if (nospace[0]=='@')
-    current_parse->command_type = 'A';
-  else if (nospace[0]=='(')
-    current_parse->command_type = 'L';
+    current_parse->command_type = 'A';              //Tipo A
   else
-    current_parse->command_type = 'C'; //TODO: insert error message if nospace[0] isnt known (don't need to know it 'cause the control has already been made by the translater)
+    current_parse->command_type = 'C';              //Tipo C
 
   //applico
   if (current_parse->command_type=='A') {
-      strcpy(current_parse->symbol,++nospace);        //copio l'istr. senza il @ (prima incremento poi copio)
-      translateA(current_parse);                      //traduco in comando A
+      strncpy(current_parse->symbol, ++nospace, strlen(nospace) - 2);        //copio l'istr. senza il @ (prima incremento poi copio)
+      translateA(fileout, current_parse, t);                      //traduco in comando A
   }
   else if (current_parse->command_type=='C')
     translate(nospace,current_parse);                 //traduco in comando C
-  else if (current_parse->command_type=='L') {}       //non faccio nulla
 }
 
 //PARSER
 //sequenza di istruzioni generali per l'assemblaggio del istruzione in binario
-command *parser(char *str) {
+command* parser(FILE *fileout, char* str, table* t) {
   char nospace[200];                                      //istruzione hack
   command *current_parse = malloc(sizeof(command));       //istanzio uno spazio pari a 'command'
   command *trash = malloc(sizeof(command));               //istanzio una nuova variabile in caso sia un comando inutile
-                                                          //TODO: vedere se si può evitare l'utilizzo di trash utilizzando una unica variaibile
 
+                                                          //TODO: vedere se si può evitare l'utilizzo di trash utilizzando una unica variaibile
   trash->instruction[0]='c';                              //Assegno a trash 'c' per identificarlo come commento
   remove_space(nospace, str);                             //rimuove gli spazi
   remove_comment(nospace);                                //rimuove i commenti
-  if (nospace[1]=='\0'||nospace[1]=='\n')                 //se l'istr è un commento o riga vuota ritorno trash          CHANGE
+  if (nospace[1]=='\0'||nospace[1]=='\n'||nospace[0]=='(')                 //se l'istr è un commento o riga vuota ritorno trash          CHANGE
     return trash;
-                                                          //TODO: non eliminare un commento solo perché presente in una riga.
-  //fputs(nospace);
-  filler(nospace,current_parse);                          //Vero e proprio assemblaggio del comando hack
+
+  filler(fileout, nospace, current_parse, t);                       //Vero e proprio assemblaggio del comando hack
   return current_parse;                                   //ritorno l'istruzione binaria
 }
 
@@ -421,37 +415,47 @@ int main(int argc, char **argv) {
   FILE *filein, *fileout;           //file di input e output
   command *current;                 //puntatore del comando in questione
   char instr[200]={'\0'};           //riga in questione
-  symbol_table st[100];             //symbol table TODO: deve diventare una lista per occupare meno spazio in memoria
+  table st;                         //symbol table TODO: deve diventare una lista per occupare meno spazio in memoria
                                     //TODO: implementare la lista
+                                    //IMPORTANTE: L'array DEVE essere maggiore rispetto alla quantità di label del filein, altrimenti scrittura sporca
+  symb *s = st.symbol_table;
 
   filein = fopen(argv[1], "r");     //assegnazione del file di input
   fileout = fopen(argv[2], "w");    //assegnazione del file di output
 
+  s = inizialize_symbol_table(s);
+  st.length = 23;
+  st.variable = 16;
 
-  /*int riga = 0:
+  int riga = 0;
+  char nospace[200];
   while(fgets(instr, sizeof(instr), filein)!=NULL){         //while ci sono righe di grandezza massima 'instr' nel file 'filein'. Se ci sono assegnarle alla variabile (instr).
-    if (instr[0]=='(')
-      add_simbol(++instr, riga, st);
+    remove_space(nospace, instr);                           //rimuove gli spazi
+    remove_comment(nospace);                                //rimuove i commenti
 
-    riga++;
-  }*/
+    if (nospace[0]=='('){
+      add_symbol(instr, riga, s);
+      s++;                                                  //sposto alla cella successiva
+      st.length++;                                          //incremento contatore lunghezza array
+    }
+
+    if (nospace[0]!='\0' && nospace[0]!='\n' && nospace[0]!='(')                 //se l'istr è un commento o riga vuota ritorno trash          CHANGE
+      riga++;
+  }
+
+  add_symbol("END_OF_SYMBOL_TABLE", -1, s);
+
+  fseek (filein, 0, SEEK_SET);                              //sposto l'offset al punto di inizio del file
 
   //SECONDA PASSATA
   //while con fgets e le righe in una lista
-  while(fgets(instr, sizeof(instr), filein)!=NULL){         //while ci sono righe di grandezza massima 'instr' nel file 'filein'. Se ci sono assegnarle alla variabile (instr).
-      //printf("%s\n", instr);
-      current = parser(instr);                              //traduco l'istruzione in binario
-      /*if (instr[0] == '\n')
-        printf("%s\n", "/n");
-      else if (instr[0] == '\0')
-        printf("%s\n", "/0");
-      else
-        printf("first: %c\n", instr[0]);*/
-      if (current->instruction[0]!='c'){                    //controllo che l'istruzione non sia un commento
+  while(fgets(instr, sizeof(instr), filein)!=NULL){           //while ci sono righe di grandezza massima 'instr' nel file 'filein'. Se ci sono assegnarle alla variabile (instr).
+      current = parser(fileout, instr, &st);                  //traduco l'istruzione in binario
+      if (current->instruction[0]!='c'){                      //controllo che l'istruzione non sia un commento
+        current->instruction[16] = '\0';                      //pulisco da memoria sporca
+        //printf("Binary: %s\n", current->instruction);
         fprintf(fileout, "%s\n", current->instruction);       //scrivo l'istruzione nel file di output
       }
-      //fprintf(fileout, "%s", current->instruction);
-      //fprintf(fileout, "%c", '\n');
   }
 
   fclose(filein);                                           //chiudo file di input
