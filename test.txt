@@ -1,0 +1,1 @@
+  push constant  10  //puts 10 on stack
