@@ -49,7 +49,7 @@ void filler(char* nospace, command* current_parse){   //written like this so tha
   current_parse->number = -1;                               //I hope I'm allowed to do this
   printf("%s", "ciaooo sono prima dei loop");
   while((nospace[i]==' ' || nospace[i] == '\t') && nospace[i]!='\0'){
-   //     printf("%s", "ciaooo sono nel loop che cerca il primo buco");
+   // printf("%s", "ciaooo sono nel loop che cerca il primo buco");
   i++;  //move forward until end of space and tab
   }
   while((nospace[i]!=' ' && nospace[i] != '\t') && nospace[i]!='\0') {    //copy until tab is found
@@ -116,7 +116,7 @@ int main(int argc, char **argv){
 
   while(fgets(instr, sizeof(instr), filein)!=NULL){         //while ci sono righe di grandezza massima 'instr' nel file 'filein'. Se ci sono assegnarle alla variabile (instr).
     current = parser(instr);
-    fprintf(fileout, "%d", current->number);
+    fprintf(fileout, "%c%d",  "@", current->number);
   }
   return 0;
 }
