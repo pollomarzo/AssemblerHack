@@ -31,10 +31,10 @@ const char push[] = "push\0", pull[] = "pull\0", con[] = "constant\0",
 
 //typedef char[15] instruction;
 
-typedef symbol_table{
+typedef struct symbol_table{
   char instruction[20];
   int num;
-} table;
+} symbol;
 
 typedef struct command{
   char instr[200];
@@ -45,10 +45,10 @@ typedef struct command{
 
 //SEARCH SYMBOL
 //ricerca simbolo nella symbol table
-int search_symbol (char* symbol, symb* s){
-for (;strcmp(s->label, "END_OF_SYMBOL_TABLE") != 0; s++){         //finchè non arrivo alla fine del array
-  if (strcmp(s->label, symbol) == 0)                              //Se label corrisponde allora ritorna numero
-    return s->number;
+int search_symbol (char* symb, symbol* s){
+for (;strcmp(s->instruction, "END_OF_SYMBOL_TABLE") != 0; s++){         //finchè non arrivo alla fine del array
+  if (strcmp(s->instruction, symb) == 0)                              //Se instruction corrisponde allora ritorna numero
+    return s->num;
 }
 
 return -1;                                                        //ritorna num negativo (non ho trovato la stringa)
@@ -56,14 +56,14 @@ return -1;                                                        //ritorna num 
 
 //ADD SYMBOL
 //aggiunge i simboli alla symbol table
-void add_symbol (char* nospace, int num, symb* s){
-  strcpy(s->label, nospace);                                //copio label
-  s->number = num;                                            //copio il numero
+void add_symbol (char* nospace, int n, symbol* s){
+  strcpy(s->instruction, nospace);                                //copio instruction
+  s->num = n;                                            //copio il numero
 }
 
 //INIZIALIZE SYMBOL TABLE
 //inizializza la symbol table
-symb* inizialize_symbol_table(symb* st){
+symbol* inizialize_symbol_table(symbol* st){
 add_symbol ("add", 0, st++);
 add_symbol ("sub", 1, st++);
 add_symbol ("neg", 2, st++);
@@ -75,7 +75,7 @@ add_symbol ("or", 7, st++);
 add_symbol ("not", 8, st++);
 add_symbol ("pop", 9, st++);
 add_symbol ("push", 10, st++);
-add_symbol ("label", 11, st++);
+add_symbol ("instruction", 11, st++);
 add_symbol ("goto", 12, st++);
 add_symbol ("if-goto", 13, st++);
 add_symbol ("function", 14, st++);
@@ -141,7 +141,7 @@ void execute(FILE *fileout, command *current){
 void filler(char* nospace, command* current_parse){        //written like this so that "  push \t   constant \t\t 9   " creates no problem
   int i = 0, j = 0, length_string = 0;
   char numero[20]={'\0'};                                 //empty string
-  int instr = 0, type = 0, num = 0;
+  int instr = 0, type = 0, num = -2000;
   char clean[200]={'\0'};                                 //empty cleaning string
   char word[20] = {'\0'};
   //printf("%s", nospace);
@@ -165,9 +165,12 @@ void filler(char* nospace, command* current_parse){        //written like this s
 
   for(;*nospace == ' ' || *nospace == '\t'; nospace++){}                                        //removing extra spaces
   fill(nospace, numero);                                        //coping the number
-  j = atoi(numero);
-  if(j)                                                //if numbero is a number
+  printf("NUMERO: %s\n", numero);
+  if (numero[0] >= '0' && numero[0] <= '9'){                      //controllo che sia un numero non negativo
+    j = atoi(numero);                                             //TODO: renderlo utile anche per i numeri negativi
+    if(j >= 0)                                                //if numero is a number
     current_parse->number = j;                                  //coping the number
+  }
 
   printf("INSTR: %s\n", current_parse->instr);
   printf("TYPE: %s\n", current_parse->type);
