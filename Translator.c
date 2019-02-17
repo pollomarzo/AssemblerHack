@@ -17,6 +17,20 @@
 -> Problemi
 */
 
+void remove_space(char *d, const char *s) {
+  for (; *s; ++s) {
+    if (*s != ' ' && *s != '\r')
+      *d++ = *s;
+    else{
+      s++;
+      if (*s != ' ' && *s != '\r')
+        *d++ = *s;
+    }
+  }
+
+  *d = *s;
+}
+
 command *parser(char *c){
   char nospace[200];
 
@@ -28,10 +42,10 @@ command *parser(char *c){
 
 int main(int argc, char **argv){
   FILE *filein, *fileout;
-  
+
   filein = fopen(argv[1], "r");     //assegnazione del file di input
   fileout = fopen(argv[2], "w");    //assegnazione del file di output
-  
+
   command *current;
   char instr[200]={'\0'};           //riga in questione
   char clean[200];
