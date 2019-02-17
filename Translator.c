@@ -28,26 +28,8 @@ situazione: abbiamo instr, type e number in una struttura. se instr è push biso
     => push
 */
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-void remove_space(char *d, const char *s) {
-  for (; *s; ++s) {
-    if (*s != ' ' && *s != '\r')
-      *d++ = *s;
-    else{
-      s++;
-      if (*s != ' ' && *s != '\r')
-        *d++ = *s;
-    }
-  }
-
-  *d = *s;
-}
-
 =======
-=======
->>>>>>> 9991da2a2b441242b3a3683f4b173d1c0c3e0515
-const char push[] = "push\0", pull[] = "pull\0", con[] = "constant\0", 
+const char push[] = "push\0", pull[] = "pull\0", con[] = "constant\0",
        loc[] = "local\0", arg[] = "argument\0", sta[] = "static\0",
        pushconstantx[] = "D=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
 
@@ -102,7 +84,7 @@ void filler(char* nospace, command* current_parse){        //written like this s
   //printf("%s", nospace);
 
   strcpy(current_parse->instr, clean);                           //initialize correctly to avoid problems
-  strcpy(current_parse->type, clean); 
+  strcpy(current_parse->type, clean);
   current_parse->number = -1;                               //I hope I'm allowed to do this
 //printf("%s", "ciaooo sono prima dei loop");
   while((nospace[i]==' ' || nospace[i] == '\t') && nospace[i]!='\0'){
@@ -148,10 +130,6 @@ void filler(char* nospace, command* current_parse){        //written like this s
 }
 
 
-<<<<<<< HEAD
->>>>>>> 9991da2a2b441242b3a3683f4b173d1c0c3e0515
-=======
->>>>>>> 9991da2a2b441242b3a3683f4b173d1c0c3e0515
 command *parser(char *c){
   char nospace[200];
 
