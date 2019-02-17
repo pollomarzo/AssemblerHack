@@ -7,25 +7,21 @@
 
 
 /*
-PROBLEMS: non sono sicuro di come funzioni fprintf. stampa "per mille" invece che @
-          fai un run e vedrai l'errore. quando copio, viene "pushàN" non so perché
-Expected solution: boh
-
-situazione: abbiamo instr, type e number in una struttura. se instr è push bisogna attivare
-            una funzione che "metta sullo stack" che chiameremo "push" e non restituisce nulla
-                                  '-> @10;D=A;@SP;A=M;M=D;@SP;M=M+1;
-            se instr è add bisogna attivare la funzione add che scriva la somma dei due ultimi
-            valori sullo stack
-            e così via. facciamo funzioni diverse? intanto faccio push
+PROBLEMS:
+situazione:
+  -> Creazione di una simbol table. Per ogni di istruzione verrà aggiunta una funzione che ritornerà la stringa costruita
+  -> Se possibile continuare facendo add, or, etc..
 
 -> Cose da fare:
   ~> implementazione stack
   ~> MAIN.c:
-    => fileIn and fileOut (PAOLO)
-    => ciclo fgets
-    => remove comments and remove spaces
+    => fileIn and fileOut (PAOLO)                 DONE
+    => ciclo fgets                                DONE
+    => remove comments and remove spaces          DONE
+    => implementare arithmetic/boolean commands
+    => implementare pop command
   ~> STACK.c:
-    => push (DAVID)                              DONE
+    => push (DAVID)                               DONE
 */
 
 //=======
@@ -33,25 +29,65 @@ const char push[] = "push\0", pull[] = "pull\0", con[] = "constant\0",
        loc[] = "local\0", arg[] = "argument\0", sta[] = "static\0",
        pushconstantx[] = "D=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
 
+//typedef char[15] instruction;
+
+typedef symbol_table{
+  char instruction[20];
+  int num;
+} table;
+
 typedef struct command{
   char instr[200];
   char type[200];
   int number;
 } command;
 
-//REMOVE SPACES AND TABS
-//remove excessive spaces and tabs
 
-void remove_strings (char *nospace){
-  for(;*nospace != ' ' && *nospace != '\t'; nospace++) {}
+//SEARCH SYMBOL
+//ricerca simbolo nella symbol table
+int search_symbol (char* symbol, symb* s){
+for (;strcmp(s->label, "END_OF_SYMBOL_TABLE") != 0; s++){         //finchè non arrivo alla fine del array
+  if (strcmp(s->label, symbol) == 0)                              //Se label corrisponde allora ritorna numero
+    return s->number;
 }
 
-void remove_space (const char* nospace, char *s){
-  while(*nospace == ' ' || *nospace == '\t')
-    *s = 5;
+return -1;                                                        //ritorna num negativo (non ho trovato la stringa)
+}
 
-  *s = *nospace;
-  printf("NOSPACE IN RS: %s\n", nospace);
+//ADD SYMBOL
+//aggiunge i simboli alla symbol table
+void add_symbol (char* nospace, int num, symb* s){
+  strcpy(s->label, nospace);                                //copio label
+  s->number = num;                                            //copio il numero
+}
+
+//INIZIALIZE SYMBOL TABLE
+//inizializza la symbol table
+symb* inizialize_symbol_table(symb* st){
+add_symbol ("add", 0, st++);
+add_symbol ("sub", 1, st++);
+add_symbol ("neg", 2, st++);
+add_symbol ("eq", 3, st++);
+add_symbol ("gt", 4, st++);
+add_symbol ("lt", 5, st++);
+add_symbol ("and", 6, st++);
+add_symbol ("or", 7, st++);
+add_symbol ("not", 8, st++);
+add_symbol ("pop", 9, st++);
+add_symbol ("push", 10, st++);
+add_symbol ("label", 11, st++);
+add_symbol ("goto", 12, st++);
+add_symbol ("if-goto", 13, st++);
+add_symbol ("function", 14, st++);
+add_symbol ("call", 15, st++);
+add_symbol ("return", 16, st++);
+add_symbol ("static", 0, st++);
+add_symbol ("local", 1, st++);
+add_symbol ("argument", 2, st++);
+add_symbol ("constant", 3, st++);
+add_symbol ("END_OF_SYMBOL_TABLE", 4, st++);
+
+return st;
 }
 
 //FILL
@@ -136,6 +172,8 @@ void filler(char* nospace, command* current_parse){        //written like this s
   printf("INSTR: %s\n", current_parse->instr);
   printf("TYPE: %s\n", current_parse->type);
   printf("NUMBER: %d\n", current_parse->number);
+
+  //PAOLO TRY
     /*current_parse->instr[j] = nospace[i];                                 //placing it inside of struct as instr
     printf("%s\n", current_parse->instr);
     j++;
@@ -252,7 +290,7 @@ int main(int argc, char **argv){
     current = parser(instr);
     //fprintf(fileout, "%c%d",  "@", current->number);
     //printf("%s", "arrivato a prima di execute");
-    //execute (fileout, current);
+    execute (fileout, current);
   }
   return 0;
 }
