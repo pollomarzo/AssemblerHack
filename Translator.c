@@ -7,6 +7,8 @@
 
 
 /*
+last commit: Changed last section filler. Should be ok
+
 PROBLEMS: non sono sicuro di come funzioni fprintf. stampa "per mille" invece che @
           fai un run e vedrai l'errore. quando copio, viene "pushàN" non so perché
 Expected solution: boh
@@ -128,11 +130,17 @@ void filler(char* nospace, command* current_parse){        //written like this s
   for(;*nospace != ' ' && *nospace != '\t' && *nospace != '\0'; nospace++){}
 
   for(;*nospace == ' ' || *nospace == '\t'; nospace++){}                                        //removing extra spaces
+  if(*nospace!='\0'){                                             //è l'unico carattere che può esserci a questo punto. \n? sarebbe dopo questo
+    fill(nospace, numero);                                        //copying the number
+    j = atoi(numero);
+    current_parse->number = j;
+  }
+  /*
   fill(nospace, numero);                                        //coping the number
   j = atoi(numero);
   if(j)                                                //if numbero is a number
     current_parse->number = j;                                  //coping the number
-
+  */
   printf("INSTR: %s\n", current_parse->instr);
   printf("TYPE: %s\n", current_parse->type);
   printf("NUMBER: %d\n", current_parse->number);
