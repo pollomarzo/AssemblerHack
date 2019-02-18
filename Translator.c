@@ -226,9 +226,9 @@ void filler(char* nospace, command* current_parse/*, Stack *s*/){        //writt
   fill(nospace, numero);                                        //coping the number
   printf("NUMERO: %s\n", numero);
   if (numero[0] >= '0' && numero[0] <= '9'){                      //controllo che sia un numero non negativo
-    j = atoi(numero);                                             //TODO: renderlo utile anche per i numeri negativi
+    j = atoi(numero);
     if(j >= 0)                                                //if numero is a number
-    current_parse->number = j;                                  //coping the number
+      current_parse->number = j;                                  //coping the number
 
     //push(s, current_parse->number);
   }
