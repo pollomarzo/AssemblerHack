@@ -376,6 +376,7 @@ int main(int argc, char **argv){
   filein = fopen(argv[1], "r");     //assegnazione del file di input
   fileout = fopen(argv[2], "w");    //assegnazione del file di output
   inizialize_symbol_table(table);   //inizializza la symbol table
+  fprintf(fileout, "%s", "@256\nD=A\n@SP\nM=D\n");
   //init(stack);                          //inizializza la stack
 
 
