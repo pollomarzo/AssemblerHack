@@ -223,6 +223,12 @@ void filler(char* nospace, command* current_parse/*, Stack *s*/){        //writt
   for(;*nospace != ' ' && *nospace != '\t' && *nospace != '\0'; nospace++){}
 
   for(;*nospace == ' ' || *nospace == '\t'; nospace++){}                                        //removing extra spaces
+  if(*nospace!='\0'){                                             //è l'unico carattere che può esserci a questo punto. \n? sarebbe dopo questo
+    fill(nospace, numero);                                        //copying the number
+    j = atoi(numero);
+    current_parse->number = j;
+  }
+  /*
   fill(nospace, numero);                                        //coping the number
   printf("NUMERO: %s\n", numero);
   if (numero[0] >= '0' && numero[0] <= '9'){                      //controllo che sia un numero non negativo
