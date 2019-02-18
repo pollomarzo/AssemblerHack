@@ -82,6 +82,8 @@ void push_cmd (int numero, char* tipo, char istruzione[200]){
 //ricerca simbolo nella symbol table
 int search_symbol (char* symb, symbol* s){
   for (;strcmp(s->instruction, "END_OF_SYMBOL_TABLE") != 0; s++){         //finchè non arrivo alla fine del array
+    printf("simbolo: %s\n", symb);
+    printf("table: %s\n", s->instruction);
     if (strcmp(s->instruction, symb) == 0)                              //Se instruction corrisponde allora ritorna numero
       return s->num;
   }
@@ -137,7 +139,7 @@ void remove_comment(char str[200]) {
   char c = '/';
   int i=0;
   while (i < 200) {
-    if (str[i] == c)
+    if (str[i] == c || str[i] == '\n')
       str[i] = '\0';
     i = i + 1;
   }
