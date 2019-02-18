@@ -173,6 +173,14 @@ void execute(FILE *fileout, command *current, symbol *st){
       strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D+M\n@SP\nM=M+1\n");
     }break;
 
+    case 1:{
+      strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D-M\n@SP\nM=M+1\n");
+    }break;
+
+    case 2:{
+      strcat(istruzione, "@SP\nM=M-1\nM=-M\n@SP\nM=M+1\n");
+    }break;
+
     case 10:{
       push_cmd(current->number, current->type, istruzione);
     }break;
