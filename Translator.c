@@ -7,33 +7,44 @@
 
 
 /*
-last commit: Changed last section filler. Should be ok
-
-PROBLEMS: non sono sicuro di come funzioni fprintf. stampa "per mille" invece che @
-          fai un run e vedrai l'errore. quando copio, viene "pushàN" non so perché
-Expected solution: boh
-
-situazione: abbiamo instr, type e number in una struttura. se instr è push bisogna attivare
-            una funzione che "metta sullo stack" che chiameremo "push" e non restituisce nulla
-                                  '-> @10;D=A;@SP;A=M;M=D;@SP;M=M+1;
-            se instr è add bisogna attivare la funzione add che scriva la somma dei due ultimi
-            valori sullo stack
-            e così via. facciamo funzioni diverse? intanto faccio push
+PROBLEMS: NONE
+situazione:
+  -> Push costant <numero> implementato correttamente.
+  -> Creazione di una simbol table. Per ogni istruzione verrà aggiunta una funzione che ritornerà la stringa costruita
+  -> Se possibile continuare facendo add, or, etc..
+  -> Per utilizzare le operazioni aritmetiche bisogna mettere i valori pushati nella stack, è essenziale formarla sennò
+      non si può capire a che numeri si riferiscono i comandi                   IMPORTANTE
+  -> Domani prova ad implementare la parte dei commandi aritmetici, copia da <push>. Essenzialmente sfrutta il fatto che
+      gli array vengono sempre passati per riferimento.
+  -> Scusami se modifico il tuo codice, da oggi non lo farò più. Prossima volta ti consiglierò il modo in cui lo implementerei io :)
+  -> Più si rendono le cose automatihe più situazioni complesse rende inoffensive!
+  -> Buon lavoro a domani ;)
 
 -> Cose da fare:
   ~> implementazione stack
   ~> MAIN.c:
-    => fileIn and fileOut (PAOLO)
-    => ciclo fgets
-    => remove comments and remove spaces
+    => fileIn and fileOut (PAOLO)                 DONE
+    => ciclo fgets                                DONE
+    => remove comments and remove spaces          DONE
+    => implement <push>                           DONE
+    => aggiungere la stack                        IMPORTANTE
+    => implementare arithmetic/boolean commands
+    => implementare pop command
   ~> STACK.c:
-    => push (DAVID)                              DONE
+    => push (DAVID)                               DONE
 */
 
 //=======
-const char push[] = "push\0", pull[] = "pull\0", con[] = "constant\0",
-       loc[] = "local\0", arg[] = "argument\0", sta[] = "static\0",
-       pushconstantx[] = "D=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
+//const char push[] = "push\0", pull[] = "pull\0", con[] = "constant\0",
+  //     loc[] = "local\0", arg[] = "argument\0", sta[] = "static\0",
+    //   pushconstantx[] = "D=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n";
+
+//typedef char[15] instruction;
+
+typedef struct symbol_table{
+  char instruction[20];
+  int num;
+} symbol;
 
 typedef struct command{
   char instr[200];
@@ -41,19 +52,76 @@ typedef struct command{
   int number;
 } command;
 
-//REMOVE SPACES AND TABS
-//remove excessive spaces and tabs
+//PUSH
+//costruisce la stringa dei comandi 'push'
+void push (int numero, char* tipo, char istruzione[200]){
+  //char istruzione[200] = "@\0";
+  //char *f = istruzione;
+  char num[7];
+  sprintf(num, "%d", numero);
 
-void remove_strings (char *nospace){
-  for(;*nospace != ' ' && *nospace != '\t'; nospace++) {}
+  switch(tipo[0]){
+    case 'c':{
+      strcat(istruzione, "@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
+    }break;
+
+    default:{
+      istruzione[0] = '\0';
+      printf("ERROR!\n");
+    }
+  }
+
+  printf("ISTR: %s\n", istruzione);
+
+  //return *f;
 }
 
-void remove_space (const char* nospace, char *s){
-  while(*nospace == ' ' || *nospace == '\t')
-    *s = 5;
 
-  *s = *nospace;
-  printf("NOSPACE IN RS: %s\n", nospace);
+//SEARCH SYMBOL
+//ricerca simbolo nella symbol table
+int search_symbol (char* symb, symbol* s){
+  for (;strcmp(s->instruction, "END_OF_SYMBOL_TABLE") != 0; s++){         //finchè non arrivo alla fine del array
+    if (strcmp(s->instruction, symb) == 0)                              //Se instruction corrisponde allora ritorna numero
+      return s->num;
+  }
+
+  return -1;                                                        //ritorna num negativo (non ho trovato la stringa)
+}
+
+//ADD SYMBOL
+//aggiunge i simboli alla symbol table
+void add_symbol (char* nospace, int n, symbol* s){
+  strcpy(s->instruction, nospace);                                //copio instruction
+  s->num = n;                                            //copio il numero
+}
+
+//INIZIALIZE SYMBOL TABLE
+//inizializza la symbol table
+void inizialize_symbol_table(symbol* st){
+  add_symbol ("add", 0, st++);
+  add_symbol ("sub", 1, st++);
+  add_symbol ("neg", 2, st++);
+  add_symbol ("eq", 3, st++);
+  add_symbol ("gt", 4, st++);
+  add_symbol ("lt", 5, st++);
+  add_symbol ("and", 6, st++);
+  add_symbol ("or", 7, st++);
+  add_symbol ("not", 8, st++);
+  add_symbol ("pop", 9, st++);
+  add_symbol ("push", 10, st++);
+  add_symbol ("label", 11, st++);
+  add_symbol ("goto", 12, st++);
+  add_symbol ("if-goto", 13, st++);
+  add_symbol ("function", 14, st++);
+  add_symbol ("call", 15, st++);
+  add_symbol ("return", 16, st++);
+  add_symbol ("static", 0, st++);
+  add_symbol ("local", 1, st++);
+  add_symbol ("argument", 2, st++);
+  add_symbol ("constant", 3, st++);
+  add_symbol ("END_OF_SYMBOL_TABLE", 4, st++);
 }
 
 //FILL
@@ -78,28 +146,50 @@ void remove_comment(char str[200]) {
 
 void write(FILE *fileout, command *current, const char task[]){
   //printf("@%d\n%s", current->number, pushconstantx);
-  if(!strcmp(task,con)){
+  /*if(!strcmp(task,con)){
     fprintf(fileout, "@%d\n%s", current->number, pushconstantx);
     printf("@%d\n%s", current->number, pushconstantx);
-  }
+  }*/
 }
 
-void execute(FILE *fileout, command *current){
-  int memory[16];                                     //we'll put the memory address in here (static 0)
+void execute(FILE *fileout, command *current, symbol *st){
+  int tipo = -1;
+  char memory[17];                                     //we'll put the memory address in here (static 0)
                                                       //                                             ^in questo caso 0.
-  printf("entrato in execute: \n");
-  printf("%s\n", current->instr);
-  if(!strcmp(current->instr, push)){
+  char istruzione[200] = "\0";
+
+  printf("entrato in execute: %s\n", current->instr);
+  tipo = search_symbol(current->instr, st);
+
+  printf("TIPO: %d\n", tipo);
+
+  switch (tipo) {
+    case 0:{                          //ADD
+      //add()
+    }break;
+
+    case 10:{
+      push(current->number, current->type, istruzione);
+    }break;
+
+    case -1:
+    default: printf("ERROR!\n");
+  }
+
+  fprintf(fileout, "%s", istruzione);
+  printf("ISTRUZIONE: %s\n", istruzione);
+
+  /*if(!strcmp(current->instr, push)){
     printf("primo strcmp confermato");
     if(!strcmp(current->type, con)){
       printf("secondo strcmp confermato");
       write(fileout, current, con);
     }
     else if(!strcmp(current->type, sta)){
-//  strcpy(memory,mem_access(current->num))
+      //  strcpy(memory,mem_access(current->num))
     }
 
-  }
+  }*/
 }
 
 //FILLER
@@ -107,7 +197,7 @@ void execute(FILE *fileout, command *current){
 void filler(char* nospace, command* current_parse){        //written like this so that "  push \t   constant \t\t 9   " creates no problem
   int i = 0, j = 0, length_string = 0;
   char numero[20]={'\0'};                                 //empty string
-  int instr = 0, type = 0, num = 0;
+  int instr = 0, type = 0, num = -2000;
   char clean[200]={'\0'};                                 //empty cleaning string
   char word[20] = {'\0'};
   //printf("%s", nospace);
@@ -117,7 +207,7 @@ void filler(char* nospace, command* current_parse){        //written like this s
   strcpy(current_parse->instr, "\0");                           //initialize correctly to avoid problems
   strcpy(current_parse->type, "\0");
   current_parse->number = -1;                               //I hope I'm allowed to do this
-//printf("%s", "ciaooo sono prima dei loop");
+  //printf("%s", "ciaooo sono prima dei loop");
 
   //DAVID TRY
   //ho reso tutto algoritmo
@@ -137,13 +227,18 @@ void filler(char* nospace, command* current_parse){        //written like this s
   }
   /*
   fill(nospace, numero);                                        //coping the number
-  j = atoi(numero);
-  if(j)                                                //if numbero is a number
+  printf("NUMERO: %s\n", numero);
+  if (numero[0] >= '0' && numero[0] <= '9'){                      //controllo che sia un numero non negativo
+    j = atoi(numero);                                             //TODO: renderlo utile anche per i numeri negativi
+    if(j >= 0)                                                //if numero is a number
     current_parse->number = j;                                  //coping the number
-  */
+  }
+
   printf("INSTR: %s\n", current_parse->instr);
   printf("TYPE: %s\n", current_parse->type);
   printf("NUMBER: %d\n", current_parse->number);
+
+  //PAOLO TRY
     /*current_parse->instr[j] = nospace[i];                                 //placing it inside of struct as instr
     printf("%s\n", current_parse->instr);
     j++;
@@ -248,11 +343,13 @@ command *parser(char *c){
 
 int main(int argc, char **argv){
   FILE *filein, *fileout;
+  command *current;
+  symbol table[30];
 
   filein = fopen(argv[1], "r");     //assegnazione del file di input
   fileout = fopen(argv[2], "w");    //assegnazione del file di output
+  inizialize_symbol_table(table);
 
-  command *current;
   char instr[200]={'\0'};           //riga in questione
 
   while(fgets(instr, sizeof(instr), filein)!=NULL){         //while ci sono righe di grandezza massima 'instr' nel file 'filein'. Se ci sono assegnarle alla variabile (instr).
@@ -260,7 +357,7 @@ int main(int argc, char **argv){
     current = parser(instr);
     //fprintf(fileout, "%c%d",  "@", current->number);
     //printf("%s", "arrivato a prima di execute");
-    //execute (fileout, current);
+    execute (fileout, current, table);
   }
   return 0;
 }
