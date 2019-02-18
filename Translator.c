@@ -52,6 +52,10 @@ typedef struct command{
   int number;
 } command;
 
+void counter(int *n){
+  *n = *n + 1;
+}
+
 //PUSH
 //costruisce la stringa dei comandi 'push'
 void push_cmd (int numero, char* tipo, char istruzione[200]){
@@ -157,8 +161,9 @@ void write(FILE *fileout, command *current, const char task[]){
 
 //EXECUTE
 //riconosce il tipo di istruzione e lo traduce
-void execute(FILE *fileout, command *current, symbol *st){
+void execute(FILE *fileout, command *current, symbol *st, int *n){
   int tipo = -1;
+  char num[6] = '\0';
   char memory[17];                                     //we'll put the memory address in here (static 0)
                                                       //                                             ^in questo caso 0.
   char istruzione[200] = "\0";
@@ -182,7 +187,9 @@ void execute(FILE *fileout, command *current, symbol *st){
     }break;
 
     case 3:{
-      strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D-M\nM=M-1\n@SP\nM=M+1\n");
+      strcat(strcat(strcat(strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\n
+                          M=M-1\nA=M\nD=M-D\n@EQ.if."), sprintf(num, "%d", n)), "\n") 
+                          "@SP\nM=M+1\n");
     }break;
 
     case 10:{
@@ -369,6 +376,8 @@ int main(int argc, char **argv){
   FILE *filein, *fileout;
   command *current;
   symbol table[30];
+  int *n;
+  *n = 0;
   //Stack *stack;
   char instr[200]="\0";           //riga in questione
 
@@ -384,7 +393,7 @@ int main(int argc, char **argv){
     current = parser(instr/*, stack*/);
     //fprintf(fileout, "%c%d",  "@", current->number);
     //printf("%s", "arrivato a prima di execute");
-    execute (fileout, current, table);
+    execute (fileout, current, table, n);
   }
   return 0;
 }
