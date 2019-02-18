@@ -1,4 +1,3 @@
- push   constant  abc  //puts abc on stack      ERROR
   push   constant  10  //puts 10 on stack
-  push   constant  -13  //puts -13 on stack     ERROR
-  push constant 111    
+  push constant 111
+  add

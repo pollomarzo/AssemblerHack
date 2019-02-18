@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-// #include "stack.h"
+ //#include "stack.h"
 // #include "command.h"
 
 
@@ -54,7 +54,7 @@ typedef struct command{
 
 //PUSH
 //costruisce la stringa dei comandi 'push'
-void push (int numero, char* tipo, char istruzione[200]){
+void push_cmd (int numero, char* tipo, char istruzione[200]){
   //char istruzione[200] = "@\0";
   //char *f = istruzione;
   char num[7];
@@ -77,7 +77,6 @@ void push (int numero, char* tipo, char istruzione[200]){
 
   //return *f;
 }
-
 
 //SEARCH SYMBOL
 //ricerca simbolo nella symbol table
@@ -144,6 +143,8 @@ void remove_comment(char str[200]) {
   }
 }
 
+//WRITE
+//it writes the string on <fileout>
 void write(FILE *fileout, command *current, const char task[]){
   //printf("@%d\n%s", current->number, pushconstantx);
   /*if(!strcmp(task,con)){
@@ -152,6 +153,8 @@ void write(FILE *fileout, command *current, const char task[]){
   }*/
 }
 
+//EXECUTE
+//riconosce il tipo di istruzione e lo traduce
 void execute(FILE *fileout, command *current, symbol *st){
   int tipo = -1;
   char memory[17];                                     //we'll put the memory address in here (static 0)
@@ -165,11 +168,11 @@ void execute(FILE *fileout, command *current, symbol *st){
 
   switch (tipo) {
     case 0:{                          //ADD
-      //add()
+      strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D+M\n@SP\nM=M+1\n");
     }break;
 
     case 10:{
-      push(current->number, current->type, istruzione);
+      push_cmd(current->number, current->type, istruzione);
     }break;
 
     case -1:
@@ -194,7 +197,7 @@ void execute(FILE *fileout, command *current, symbol *st){
 
 //FILLER
 //
-void filler(char* nospace, command* current_parse){        //written like this so that "  push \t   constant \t\t 9   " creates no problem
+void filler(char* nospace, command* current_parse/*, Stack *s*/){        //written like this so that "  push \t   constant \t\t 9   " creates no problem
   int i = 0, j = 0, length_string = 0;
   char numero[20]={'\0'};                                 //empty string
   int instr = 0, type = 0, num = -2000;
@@ -232,6 +235,8 @@ void filler(char* nospace, command* current_parse){        //written like this s
     j = atoi(numero);                                             //TODO: renderlo utile anche per i numeri negativi
     if(j >= 0)                                                //if numero is a number
     current_parse->number = j;                                  //coping the number
+
+    //push(s, current_parse->number);
   }
 
   printf("INSTR: %s\n", current_parse->instr);
@@ -325,7 +330,7 @@ remove_space(nospace);
 
 //PARSER
 //prepara le variabili e l'istruzione da tradurre
-command *parser(char *c){
+command *parser(char *c/*, Stack *s*/){
   char nospace[200];
 
   //remove_space(nospace, c);                             //rimuove gli spazi
@@ -337,7 +342,8 @@ command *parser(char *c){
   trash->instr[0]='\0';
   trash->type[0]='\0';
 
-  filler(nospace, current_parse);                         //
+  //TODO: controllo che non sia una stringa vuota, se si può fare
+  filler(nospace, current_parse/*, s*/);                         //
   return current_parse;                                   //ritorno il puntatore
 }
 
@@ -345,16 +351,19 @@ int main(int argc, char **argv){
   FILE *filein, *fileout;
   command *current;
   symbol table[30];
+  //Stack *stack;
+  char instr[200]="\0";           //riga in questione
+
 
   filein = fopen(argv[1], "r");     //assegnazione del file di input
   fileout = fopen(argv[2], "w");    //assegnazione del file di output
-  inizialize_symbol_table(table);
+  inizialize_symbol_table(table);   //inizializza la symbol table
+  //init(stack);                          //inizializza la stack
 
-  char instr[200]={'\0'};           //riga in questione
 
   while(fgets(instr, sizeof(instr), filein)!=NULL){         //while ci sono righe di grandezza massima 'instr' nel file 'filein'. Se ci sono assegnarle alla variabile (instr).
     printf("CURRENT INSTRUCTION: %s\n", instr);
-    current = parser(instr);
+    current = parser(instr/*, stack*/);
     //fprintf(fileout, "%c%d",  "@", current->number);
     //printf("%s", "arrivato a prima di execute");
     execute (fileout, current, table);
