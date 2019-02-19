@@ -7,7 +7,8 @@
 
 
 /*
-PROBLEMS: NONE
+PROBLEMS:
+  ~> Problema nella trovare il simbolo "eq" e tutti gli altri!
 situazione:
   -> Push costant <numero> implementato correttamente.
   -> Creazione di una simbol table. Per ogni istruzione verrà aggiunta una funzione che ritornerà la stringa costruita
