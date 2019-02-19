@@ -1,0 +1,33 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/08/FunctionCalls/FibonacciElement/Main.vm
+
+// Computes the n'th element of the Fibonacci series, recursively.
+// n is given in argument[0]. 
+
+push constant 7
+call FibonacciElement.fibonacci 1   // Compute the 7’th fibonacci element
+label WHILE
+goto WHILE              // Loop infinitely
+
+function FibonacciElement.fibonacci 0
+push argument 0
+push constant 2
+lt                     // check if n < 2
+if-goto IF_TRUE
+goto IF_FALSE
+label IF_TRUE          // if n<2, return n
+push argument 0        
+return
+label IF_FALSE         // if n>=2, return fib(n-2)+fib(n-1)
+push argument 0
+push constant 2
+sub
+call FibonacciElement.fibonacci 1  // compute fib(n-2)
+push argument 0
+push constant 1
+sub
+call FibonacciElement.fibonacci 1  // compute fib(n-1)
+add                    // return fib(n-1) + fib(n-2)
+return

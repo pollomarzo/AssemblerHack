@@ -1,4 +1,4 @@
-LT#include <stdio.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -163,7 +163,7 @@ void write(FILE *fileout, command *current, const char task[]){
 //riconosce il tipo di istruzione e lo traduce
 void execute(FILE *fileout, command *current, symbol *st, int *n){
   int tipo = -1;
-  char num[6] = '\0';
+  char num[6] = "\0";
   char memory[17];                                     //we'll put the memory address in here (static 0)
                                                       //                                             ^in questo caso 0.
   char istruzione[200] = "\0";
@@ -179,140 +179,62 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
     }break;
 
     case 1:{                          //SUB
-      strcat(istruzione, "@SP\n
-                          M=M-1\n
-                          A=M\n
-                          D=M\n
-                          @SP
-                          \n
-                          M=M-1\n
-                          A=M\n
-                          M=D-M\n
-                          @SP\n
-                          M=M+1\n
-      ");
+      strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D-M\n@SP\nM=M+1\n");
     }break;
 
     case 2:{                          //NEG
-      strcat(istruzione, "@SP\n
-                          M=M-1\n
-                          M=-M\n
-                          @SP\n
-                          M=M+1\n
-      ");
+      strcat(istruzione, "@SP\nM=M-1\nM=-M\n@SP\nM=M+1\n");
     }break;
 
     case 3:{                          //EQ
-      sprintf(num, "%d", n);
-      strcat(istruzione, "@SP\n
-                          M=M-1\n
-                          A=M\n
-                          D=M\n
-                          @SP\n
-                          M=M-1\n
-                          A=M\n
-                          D=M-D\n
-                          @EQ_if_
-      ");
+      sprintf(num, "%d", *n);
+      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nD=M-D\n@EQ_if_");
       strcat(istruzione, num);
-      strcat(istruzione, "\n
-                          D;JEQ\n
-                          D=0\n
-                          @EQ_end_
-      ");
+      strcat(istruzione, "\nD;JEQ\nD=0\n@EQ_end_");
       strcat(istruzione, num);
-      strcat(istruzione, "\n
-                          0;JMP\n
-                        (EQ_if_
-      ");
+      strcat(istruzione, "\n0;JMP\n(EQ_if_");
       strcat(istruzione, num);
-      strcat(istruzione, ")\n
-                          D=-1\n
-                        (EQ_end_
-      ");
+      strcat(istruzione, ")\nD=-1\n(EQ_end_");
       strcat(istruzione, num);
-      strcat(istruzione, ")\n
-                          @SP\n
-                          A=M-1\n
-                          M=D\n
-      ");
+      strcat(istruzione, ")\n@SP\nA=M-1\nM=D\n");
     }break;
 
     case 4:{                          //GT
-      sprintf(num, "%d", n);
-      strcat(istruzione, "@SP\n
-                          M=M-1\n
-                          A=M\n
-                          D=M\n
-                          @SP\n
-                          M=M-1\n
-                          A=M\n
-                          D=M-D\n
-                          @GT_if_
-      ");
+      sprintf(num, "%d", *n);
+      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nD=M-D\n@GT_if_");
       strcat(istruzione, num);
-      strcat(istruzione, "\n
-                          D;JGT\n
-                          D=0\n
-                          @GT_end_
-      ");
+      strcat(istruzione, "\nD;JGT\nD=0\n@GT_end_");
       strcat(istruzione, num);
-      strcat(istruzione, "\n
-                          0;JMP\n
-                        (GT_if_
-      ");
+      strcat(istruzione, "\n0;JMP\n(GT_if_");
       strcat(istruzione, num);
-      strcat(istruzione, ")\n
-                          D=-1\n
-                        (GT_end_
-      ");
+      strcat(istruzione, ")\nD=-1\n(GT_end_");
       strcat(istruzione, num);
-      strcat(istruzione, ")\n
-                          @SP\n
-                          A=M-1\n
-                          M=D\n
-      ");
+      strcat(istruzione, ")\n@SP\nA=M-1\nM=D\n");
     }break;
 
     case 5:{                          //LT
-      sprintf(num, "%d", n);
-      strcat(istruzione, "@SP\n
-                          M=M-1\n
-                          A=M\n
-                          D=M\n
-                          @SP\n
-                          M=M-1\n
-                          A=M\n
-                          D=M-D\n
-                          @LT_if_
-      ");
+      sprintf(num, "%d", *n);
+      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nD=M-D\n@LT_if_");
       strcat(istruzione, num);
-      strcat(istruzione, "\n
-                          D;JLT\n
-                          D=0\n
-                          @LT_end_
-      ");
+      strcat(istruzione, "\nD;JLT\nD=0\n@LT_end_");
       strcat(istruzione, num);
-      strcat(istruzione, "\n
-                          0;JMP\n
-                        (LT_if_
-      ");
+      strcat(istruzione, "\n0;JMP\n(LT_if_");
       strcat(istruzione, num);
-      strcat(istruzione, ")\n
-                          D=-1\n
-                        (LT_end_
-      ");
+      strcat(istruzione, ")\nD=-1\n(LT_end_");
       strcat(istruzione, num);
-      strcat(istruzione, ")\n
-                          @SP\n
-                          A=M-1\n
-                          M=D\n
-      ");
+      strcat(istruzione, ")\n@SP\nA=M-1\nM=D\n");
     }break;
 
-    case 6: {                         //AND
+    case 6:{                          //AND
+      strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D&M\n@SP\nM=M+1\n");
+    }break;
 
+    case 7:{                          //OR
+      strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D|M\n@SP\nM=M+1\n");
+    }break;
 
+    case 8:{                          //NOT
+      strcat(istruzione, "@SP\nM=M-1\nM=!M\n@SP\nM=M+1\n");
     }break;
 
     case 10:{
@@ -490,8 +412,7 @@ int main(int argc, char **argv){
   FILE *filein, *fileout;
   command *current;
   symbol table[30];
-  int *n;
-  *n = 0;
+  int n = 0;
   //Stack *stack;
   char instr[200]="\0";           //riga in questione
 
@@ -508,7 +429,9 @@ int main(int argc, char **argv){
     current = parser(instr/*, stack*/);
     //fprintf(fileout, "%c%d",  "@", current->number);
     //printf("%s", "arrivato a prima di execute");
-    execute (fileout, current, table, n);
+    execute (fileout, current, table, &n);
+
+    n++;
   }
   return 0;
 }
