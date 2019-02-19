@@ -144,7 +144,7 @@ void remove_comment(char str[200]) {
   char c = '/';
   int i=0;
   while (i < 200) {
-    if (str[i] == c || str[i] == '\n')
+    if (str[i] == c || str[i] == '\n' || str[i] == '\r')
       str[i] = '\0';
     i = i + 1;
   }
@@ -176,15 +176,15 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
 
   switch (tipo) {
     case 0:{                          //ADD
-      strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D+M\n@SP\nM=M+1\n");
+      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nM=M+D\n@SP\nM=M+1\n");
     }break;
 
     case 1:{                          //SUB
-      strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D-M\n@SP\nM=M+1\n");
+      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nM=M-D\n@SP\nM=M+1\n");
     }break;
 
     case 2:{                          //NEG
-      strcat(istruzione, "@SP\nM=M-1\nM=-M\n@SP\nM=M+1\n");
+      strcat(istruzione, "@SP\nAM=M-1\nM=-M\n@SP\nM=M+1\n");
     }break;
 
     case 3:{                          //EQ
@@ -197,7 +197,7 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
       strcat(istruzione, num);
       strcat(istruzione, ")\nD=-1\n(EQ_end_");
       strcat(istruzione, num);
-      strcat(istruzione, ")\n@SP\nA=M-1\nM=D\n");
+      strcat(istruzione, ")\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
     }break;
 
     case 4:{                          //GT
@@ -210,7 +210,7 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
       strcat(istruzione, num);
       strcat(istruzione, ")\nD=-1\n(GT_end_");
       strcat(istruzione, num);
-      strcat(istruzione, ")\n@SP\nA=M-1\nM=D\n");
+      strcat(istruzione, ")\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
     }break;
 
     case 5:{                          //LT
@@ -223,19 +223,19 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
       strcat(istruzione, num);
       strcat(istruzione, ")\nD=-1\n(LT_end_");
       strcat(istruzione, num);
-      strcat(istruzione, ")\n@SP\nA=M-1\nM=D\n");
+      strcat(istruzione, ")\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
     }break;
 
     case 6:{                          //AND
-      strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D&M\n@SP\nM=M+1\n");
+      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nM=M&D\n@SP\nM=M+1\n");
     }break;
 
     case 7:{                          //OR
-      strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D|M\n@SP\nM=M+1\n");
+      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nM=M|D\n@SP\nM=M+1\n");
     }break;
 
     case 8:{                          //NOT
-      strcat(istruzione, "@SP\nM=M-1\nM=!M\n@SP\nM=M+1\n");
+      strcat(istruzione, "@SP\nAM=M-1\nM=!M\n@SP\nM=M+1\n");
     }break;
 
     case 10:{
