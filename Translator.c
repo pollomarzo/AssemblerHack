@@ -1,4 +1,4 @@
-#include <stdio.h>
+LT#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -178,18 +178,141 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
       strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D+M\n@SP\nM=M+1\n");
     }break;
 
-    case 1:{
-      strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D-M\n@SP\nM=M+1\n");
+    case 1:{                          //SUB
+      strcat(istruzione, "@SP\n
+                          M=M-1\n
+                          A=M\n
+                          D=M\n
+                          @SP
+                          \n
+                          M=M-1\n
+                          A=M\n
+                          M=D-M\n
+                          @SP\n
+                          M=M+1\n
+      ");
     }break;
 
-    case 2:{
-      strcat(istruzione, "@SP\nM=M-1\nM=-M\n@SP\nM=M+1\n");
+    case 2:{                          //NEG
+      strcat(istruzione, "@SP\n
+                          M=M-1\n
+                          M=-M\n
+                          @SP\n
+                          M=M+1\n
+      ");
     }break;
 
-    case 3:{
-      strcat(strcat(strcat(strcat(istruzione, "@SP\nM=M-1\nA=M\nD=M\n@SP\n
-                          M=M-1\nA=M\nD=M-D\n@EQ.if."), sprintf(num, "%d", n)), "\n") 
-                          "@SP\nM=M+1\n");
+    case 3:{                          //EQ
+      sprintf(num, "%d", n);
+      strcat(istruzione, "@SP\n
+                          M=M-1\n
+                          A=M\n
+                          D=M\n
+                          @SP\n
+                          M=M-1\n
+                          A=M\n
+                          D=M-D\n
+                          @EQ_if_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, "\n
+                          D;JEQ\n
+                          D=0\n
+                          @EQ_end_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, "\n
+                          0;JMP\n
+                        (EQ_if_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, ")\n
+                          D=-1\n
+                        (EQ_end_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, ")\n
+                          @SP\n
+                          A=M-1\n
+                          M=D\n
+      ");
+    }break;
+
+    case 4:{                          //GT
+      sprintf(num, "%d", n);
+      strcat(istruzione, "@SP\n
+                          M=M-1\n
+                          A=M\n
+                          D=M\n
+                          @SP\n
+                          M=M-1\n
+                          A=M\n
+                          D=M-D\n
+                          @GT_if_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, "\n
+                          D;JGT\n
+                          D=0\n
+                          @GT_end_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, "\n
+                          0;JMP\n
+                        (GT_if_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, ")\n
+                          D=-1\n
+                        (GT_end_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, ")\n
+                          @SP\n
+                          A=M-1\n
+                          M=D\n
+      ");
+    }break;
+
+    case 5:{                          //LT
+      sprintf(num, "%d", n);
+      strcat(istruzione, "@SP\n
+                          M=M-1\n
+                          A=M\n
+                          D=M\n
+                          @SP\n
+                          M=M-1\n
+                          A=M\n
+                          D=M-D\n
+                          @LT_if_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, "\n
+                          D;JLT\n
+                          D=0\n
+                          @LT_end_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, "\n
+                          0;JMP\n
+                        (LT_if_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, ")\n
+                          D=-1\n
+                        (LT_end_
+      ");
+      strcat(istruzione, num);
+      strcat(istruzione, ")\n
+                          @SP\n
+                          A=M-1\n
+                          M=D\n
+      ");
+    }break;
+
+    case 6: {                         //AND
+
+
     }break;
 
     case 10:{
@@ -254,15 +377,6 @@ void filler(char* nospace, command* current_parse/*, Stack *s*/){        //writt
     //push(s, current_parse->number);
   }
   /*
-  fill(nospace, numero);                                        //coping the number
-  printf("NUMERO: %s\n", numero);
-  if (numero[0] >= '0' && numero[0] <= '9'){                      //controllo che sia un numero non negativo
-    j = atoi(numero);
-    if(j >= 0)                                                //if numero is a number
-      current_parse->number = j;                                  //coping the number
-
-    //push(s, current_parse->number);
-  }
 
   printf("INSTR: %s\n", current_parse->instr);
   printf("TYPE: %s\n", current_parse->type);
