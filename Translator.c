@@ -44,6 +44,7 @@ situazione:
 
 typedef struct symbol_table{
   char instruction[20];
+  char special[20];
   int num;
 } symbol;
 
@@ -83,51 +84,98 @@ void push_cmd (int numero, char* tipo, char istruzione[200]){
   //return *f;
 }
 
+//ARITHEMTIC
+//costruisce la stringa dei comandi aritmetici
+/*void arithmetic (char istruzione[200], int* n){
+  strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nM=M");
+  switch(*n){
+    case 0: strcat(istruzione, "+");break;
+    case 1: strcat(istruzione, "-");break;
+    case 2: strcat(istruzione, "&");break;
+    case 3: strcat(istruzione, "|");break;
+    default: strcat(istruzione, "ERROR!");
+  }
+  strcat(istruzione, "D\n@SP\nM=M+1\n");
+}*/
+void arithmetic (char istruzione[200], char* s1, char* t, char* s2){
+  strcat(istruzione, s1);
+  strcat(istruzione, t);
+  strcat(istruzione, s2);
+}
+
+//BOOLEAN
+//costruisce la stringa dei comandi booleani
+void boolean (char istruzione[200], char* s, int* n){
+  char num[6] = "\0";
+  sprintf(num, "%d", *n);
+  strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nD=M-D\n@");
+  strcat(istruzione, s);
+  strcat(istruzione, "_if_");
+  strcat(istruzione, num);
+  strcat(istruzione, "\nD;J");
+  strcat(istruzione, s);
+  strcat(istruzione, "\nD=0\n@");
+  strcat(istruzione, s);
+  strcat(istruzione, "_end_");
+  strcat(istruzione, num);
+  strcat(istruzione, "\n0;JMP\n(");
+  strcat(istruzione, s);
+  strcat(istruzione, "_if_");
+  strcat(istruzione, num);
+  strcat(istruzione, ")\nD=-1\n(");
+  strcat(istruzione, s);
+  strcat(istruzione, "_end_");
+  strcat(istruzione, num);
+  strcat(istruzione, ")\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
+}
+
 //SEARCH SYMBOL
 //ricerca simbolo nella symbol table
-int search_symbol (char* symb, symbol* s){
+symbol* search_symbol (char* symb, symbol* s){
   for (;strcmp(s->instruction, "END_OF_SYMBOL_TABLE") != 0; s++){         //finchè non arrivo alla fine del array
     printf("simbolo: %s\n", symb);
     printf("table: %s\n", s->instruction);
     if (strcmp(s->instruction, symb) == 0)                              //Se instruction corrisponde allora ritorna numero
-      return s->num;
+      break;
   }
-
-  return -1;                                                        //ritorna num negativo (non ho trovato la stringa)
+  printf("simbolo1: %s\n", symb);
+  printf("table1: %s\n", s->instruction);
+  return s;                                                        //ritorna num negativo (non ho trovato la stringa)
 }
 
 //ADD SYMBOL
 //aggiunge i simboli alla symbol table
-void add_symbol (char* nospace, int n, symbol* s){
+void add_symbol (char* nospace, char* spec, int n, symbol* s){
   strcpy(s->instruction, nospace);                                //copio instruction
+  strcpy(s->special, spec);                                //copio instruction
   s->num = n;                                            //copio il numero
 }
 
 //INIZIALIZE SYMBOL TABLE
 //inizializza la symbol table
 void inizialize_symbol_table(symbol* st){
-  add_symbol ("add", 0, st++);
-  add_symbol ("sub", 1, st++);
-  add_symbol ("neg", 2, st++);
-  add_symbol ("eq", 3, st++);
-  add_symbol ("gt", 4, st++);
-  add_symbol ("lt", 5, st++);
-  add_symbol ("and", 6, st++);
-  add_symbol ("or", 7, st++);
-  add_symbol ("not", 8, st++);
-  add_symbol ("pop", 9, st++);
-  add_symbol ("push", 10, st++);
-  add_symbol ("label", 11, st++);
-  add_symbol ("goto", 12, st++);
-  add_symbol ("if-goto", 13, st++);
-  add_symbol ("function", 14, st++);
-  add_symbol ("call", 15, st++);
-  add_symbol ("return", 16, st++);
-  add_symbol ("static", 0, st++);
-  add_symbol ("local", 1, st++);
-  add_symbol ("argument", 2, st++);
-  add_symbol ("constant", 3, st++);
-  add_symbol ("END_OF_SYMBOL_TABLE", 4, st++);
+  add_symbol ("add", "+", 0, st++);
+  add_symbol ("sub", "-", 0, st++);
+  add_symbol ("and", "&", 0, st++);
+  add_symbol ("or", "|", 0, st++);
+  add_symbol ("not", "!", 1, st++);
+  add_symbol ("neg", "-", 1, st++);
+  add_symbol ("eq", "EQ", 2, st++);
+  add_symbol ("gt", "GT", 2, st++);
+  add_symbol ("lt", "LT", 2, st++);
+  add_symbol ("pop", "\0", 9, st++);
+  add_symbol ("push", "\0", 10, st++);
+  add_symbol ("label", "\0", 11, st++);
+  add_symbol ("goto", "\0", 12, st++);
+  add_symbol ("if-goto", "\0", 13, st++);
+  add_symbol ("function", "\0", 14, st++);
+  add_symbol ("call", "\0", 15, st++);
+  add_symbol ("return", "\0", 16, st++);
+  add_symbol ("static", "\0", 0, st++);
+  add_symbol ("local", "\0", 1, st++);
+  add_symbol ("argument", "\0", 2, st++);
+  add_symbol ("constant", "\0", 3, st++);
+  add_symbol ("END_OF_SYMBOL_TABLE", "\0", -1, st++);
 }
 
 //FILL
@@ -163,7 +211,7 @@ void write(FILE *fileout, command *current, const char task[]){
 //EXECUTE
 //riconosce il tipo di istruzione e lo traduce
 void execute(FILE *fileout, command *current, symbol *st, int *n){
-  int tipo = -1;
+  symbol *tipo;
   char num[6] = "\0";
   char memory[17];                                     //we'll put the memory address in here (static 0)
                                                       //                                             ^in questo caso 0.
@@ -172,35 +220,22 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
   printf("entrato in execute: %s\n", current->instr);
   tipo = search_symbol(current->instr, st);
 
-  printf("TIPO: %d\n", tipo);
+  printf("TIPO: %d\n", tipo->num);
 
-  switch (tipo) {
-    case 0:{                          //ADD
-      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nM=M+D\n@SP\nM=M+1\n");
+  switch (tipo->num) {
+    case 0:{                  //ADD, SUB, AND, OR
+      arithmetic(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nM=M", tipo->special, "D\n@SP\nM=M+1\n");
     }break;
 
-    case 1:{                          //SUB
-      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nM=M-D\n@SP\nM=M+1\n");
+    case 1:{                  //NEG, NOT
+      arithmetic(istruzione, "@SP\nAM=M-1\nM=", tipo->special, "M\n@SP\nM=M+1\n");
     }break;
 
-    case 2:{                          //NEG
-      strcat(istruzione, "@SP\nAM=M-1\nM=-M\n@SP\nM=M+1\n");
+    case 2:{                          //EQ
+      boolean(istruzione, tipo->special, n);
     }break;
 
-    case 3:{                          //EQ
-      sprintf(num, "%d", *n);
-      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nD=M-D\n@EQ_if_");
-      strcat(istruzione, num);
-      strcat(istruzione, "\nD;JEQ\nD=0\n@EQ_end_");
-      strcat(istruzione, num);
-      strcat(istruzione, "\n0;JMP\n(EQ_if_");
-      strcat(istruzione, num);
-      strcat(istruzione, ")\nD=-1\n(EQ_end_");
-      strcat(istruzione, num);
-      strcat(istruzione, ")\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
-    }break;
-
-    case 4:{                          //GT
+    case 7:{                          //GT
       sprintf(num, "%d", *n);
       strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nD=M-D\n@GT_if_");
       strcat(istruzione, num);
@@ -213,7 +248,7 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
       strcat(istruzione, ")\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
     }break;
 
-    case 5:{                          //LT
+    case 8:{                          //LT
       sprintf(num, "%d", *n);
       strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nD=M-D\n@LT_if_");
       strcat(istruzione, num);
@@ -224,18 +259,6 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
       strcat(istruzione, ")\nD=-1\n(LT_end_");
       strcat(istruzione, num);
       strcat(istruzione, ")\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
-    }break;
-
-    case 6:{                          //AND
-      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nM=M&D\n@SP\nM=M+1\n");
-    }break;
-
-    case 7:{                          //OR
-      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nM=M|D\n@SP\nM=M+1\n");
-    }break;
-
-    case 8:{                          //NOT
-      strcat(istruzione, "@SP\nAM=M-1\nM=!M\n@SP\nM=M+1\n");
     }break;
 
     case 10:{
