@@ -272,6 +272,8 @@ void filler(char* nospace, command* current_parse/*, Stack *s*/){        //writt
   char word[20] = {'\0'};
   //printf("%s", nospace);
 
+  memset(current_parse->instr, 0, 200);
+  memset(current_parse->type, 0, 200);
   //you can either way put '\0' to initialize it
   //Inizialing command variables        TODO: create a methods to do it
   strcpy(current_parse->instr, "\0");                           //initialize correctly to avoid problems
@@ -282,15 +284,15 @@ void filler(char* nospace, command* current_parse/*, Stack *s*/){        //writt
   //DAVID TRY
   //ho reso tutto algoritmo
   for(;*nospace == ' ' || *nospace == '\t'; nospace++){}                                        //removing extra spaces
-  fill(nospace, current_parse->instr);          //coping the instruction
+  fill(nospace, current_parse->instr);          //copying the instruction
   for(;*nospace != ' ' && *nospace != '\t' && *nospace != '\0'; nospace++){}
 
   for(;*nospace == ' ' || *nospace == '\t'; nospace++){}                                        //removing extra spaces
-  fill(nospace, current_parse->type);           //coping the type
+  fill(nospace, current_parse->type);           //copying the type
   for(;*nospace != ' ' && *nospace != '\t' && *nospace != '\0'; nospace++){}
 
   for(;*nospace == ' ' || *nospace == '\t'; nospace++){}                                        //removing extra spaces
-  fill(nospace, numero);                                        //coping the number
+  fill(nospace, numero);                                        //copying the number
   printf("NUMERO: %s\n", numero);
   if (numero[0] >= '0' && numero[0] <= '9'){                      //controllo che sia un numero non negativo
     j = atoi(numero);
