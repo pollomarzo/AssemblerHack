@@ -124,15 +124,15 @@ void arithmetic (char istruzione[200], char* s1, char* t, char* s2){
 
 //FINDNAME
 void find_name(command *current){
-  while(command->type != '\0' && command->type != '\n' && command->type != '.' && command->type != ' '){
-    command->type++;
+  while(*(current->type) != '\0' && *(current->type) != '\n' && *(current->type) != '.' && *(current->type) != ' '){
+    current->type = current->type + 1;
   }
-  if (command->type == '.') command->type++;
+  if (*(current->type) == '.') current->type=current->type + 1;
 }
 
 //FUNCTIONDEF
 void function(char istruzione[200], command *current){
-  strcpy(istruzione, '(');
+  strcat(istruzione, "(");
   strcat(istruzione, current->type);
   strcat(istruzione, ")\n@SP\nA=M\n");
   int i = 0;
