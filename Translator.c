@@ -127,7 +127,7 @@ void find_name(command *current){
   while(command->type != '\0' && command->type != '\n' && command->type != '.' && command->type != ' '){
     command->type++;
   }
-  if (*command->type == '.') command->type++;
+  if (command->type == '.') command->type++;
 }
 
 //FUNCTIONDEF
@@ -164,7 +164,7 @@ void call(char istruzione[200], command *current, int *n){
 
 //FUNCRETURN
 void funcreturn(char istruzione[200]){
-  strcpy(istruzione, "@LCL\nD=M\n@5\nA=D-A\nD=M\n@R13\nM=D\n@SP\nA=M-1\nD=M\n@ARG\nA=M\nM=D\nD=A+1\n@SP\nM=D\n@LCL\nAM=M-1\nD=M\n@THAT\nM=D\n@LCL\nAM=M-1\nD=M\n@THIS\nM=D\n@LCL\nAM=M-1\nD=M\n@ARG\nM=D\n@LCL\nA=M-1\nD=M\n@LCL\nM=D\n@R13\nA=M\n0;JMP\n\0");
+  strcat(istruzione, "@LCL\nD=M\n@5\nA=D-A\nD=M\n@R13\nM=D\n@SP\nA=M-1\nD=M\n@ARG\nA=M\nM=D\nD=A+1\n@SP\nM=D\n@LCL\nAM=M-1\nD=M\n@THAT\nM=D\n@LCL\nAM=M-1\nD=M\n@THIS\nM=D\n@LCL\nAM=M-1\nD=M\n@ARG\nM=D\n@LCL\nA=M-1\nD=M\n@LCL\nM=D\n@R13\nA=M\n0;JMP\n\0");
 }
 
 //BOOLEAN
@@ -332,11 +332,11 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
 
     case 14:{
       find_name(current);
-      function(istruzione, current, n);
+      function(istruzione, current);
     }
 
     case 15:{
-      call(istruzione, current);
+      call(istruzione, current, n);
     }
 
     case 16:{
