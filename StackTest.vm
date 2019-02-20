@@ -4,7 +4,7 @@
 // File name: projects/07/StackArithmetic/StackTest/StackTest.vm
 
 // Executes a sequence of arithmetic and logical operations
-// on the stack. 
+// on the stack.
 push constant 17
 push constant 17
 eq
@@ -43,3 +43,10 @@ and
 push constant 82
 or
 not
+pop local 0
+push constant 10
+pop argument 1
+push local 0
+push argument 1
+add
+pop local 1
