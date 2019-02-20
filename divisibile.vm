@@ -1,0 +1,79 @@
+push constant 1
+push constant 2
+push constant 3
+pop static 0
+push constant 2
+pop static 1
+label while1
+
+push static 0
+push constant 20
+eq
+if-goto endloop
+push constant 2
+pop static 1
+label while2
+push static 0
+push static 1
+call divisibile.divisibile 2
+if-goto escodalloop
+push static 1
+call divisibile.increment 1
+pop static 1
+push static 1
+push static 0
+lt
+if-goto while2
+push static 0
+push static 1
+eq
+if-goto mettiinstack
+label mettiinstack
+push static 1
+push static 0
+call divisibile.increment 1
+pop static 0
+goto while1
+label escodalloop
+push static 0
+call divisibile.increment 1
+pop static 0
+goto while1
+label endloop
+push constant 0
+push constant 0
+eq
+if-goto endloop
+
+
+function divisibile.increment 1
+push argument 0
+push constant 1
+add
+return
+
+function divisibile.divisibile 1
+push argument 0
+pop local 0
+label loop
+push local 0
+push argument 1
+sub
+pop local 0
+push local 0
+push argument 1
+gt
+push local 0
+push argument 1
+eq
+or
+if-goto loop
+push local 0
+push constant 0
+eq
+if-goto true
+push constant 0
+return
+label true
+push constant 1
+return

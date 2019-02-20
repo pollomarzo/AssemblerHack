@@ -50,8 +50,8 @@ typedef struct symbol_table{
 } symbol;
 
 typedef struct command{
-  char instr[200];
-  char type[200];
+  char instr[2000];
+  char type[2000];
   int number;
 } command;
 
@@ -70,7 +70,7 @@ symbol* search_symbol (char* symb, symbol* s){
 //POP
 //costruisce la stringa dei comandi 'pop'
 void pop_cmd (int numero, char* segment, char istruzione[200], symbol *st){
-  //char istruzione[200] = "@\0";
+  //char istruzione[2000] = "@\0";
   //char *f = istruzione;
   char num[7];
   symbol *tipo;
@@ -141,8 +141,8 @@ void pop_cmd (int numero, char* segment, char istruzione[200], symbol *st){
 
 //PUSH
 //costruisce la stringa dei comandi 'push'
-void push_cmd (int numero, char* segment, char istruzione[200], symbol *st){
-  //char istruzione[200] = "@\0";
+void push_cmd (int numero, char* segment, char istruzione[2000], symbol *st){
+  //char istruzione[2000] = "@\0";
   //char *f = istruzione;
   char num[7];
   symbol *tipo;
@@ -203,7 +203,7 @@ void push_cmd (int numero, char* segment, char istruzione[200], symbol *st){
 
 //ARITHEMTIC
 //costruisce la stringa dei comandi aritmetici
-/*void arithmetic (char istruzione[200], int* n){
+/*void arithmetic (char istruzione[2000], int* n){
   strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nM=M");
   switch(*n){
     case 0: strcat(istruzione, "+");break;
@@ -214,22 +214,15 @@ void push_cmd (int numero, char* segment, char istruzione[200], symbol *st){
   }
   strcat(istruzione, "D\n@SP\nM=M+1\n");
 }*/
-void arithmetic (char istruzione[200], char* s1, char* t, char* s2){
+void arithmetic (char istruzione[2000], char* s1, char* t, char* s2){
   strcat(istruzione, s1);
   strcat(istruzione, t);
   strcat(istruzione, s2);
 }
 
-//FINDNAME
-void find_name(command *current){
-  while(*(current->type) != '\0' && *(current->type) != '\n' && *(current->type) != '.' && *(current->type) != ' '){
-    current->type = current->type + 1;
-  }
-  if (*(current->type) == '.') current->type=current->type + 1;
-}
 
 //FUNCTIONDEF
-void function(char istruzione[200], command *current){
+void function(char istruzione[2000], command *current){
   strcat(istruzione, "(");
   strcat(istruzione, current->type);
   strcat(istruzione, ")\n@SP\nA=M\n");
@@ -242,7 +235,7 @@ void function(char istruzione[200], command *current){
 }
 
 //FUNCTIONCALL
-void call(char istruzione[200], command *current, int *n){
+void call(char istruzione[2000], command *current, int *n){
   char c[4] = "\0\0\0\0";
   char p[4] = "\0\0\0\0";
   sprintf(p, "%d", current->number);
@@ -261,13 +254,13 @@ void call(char istruzione[200], command *current, int *n){
 }
 
 //FUNCRETURN
-void funcreturn(char istruzione[200]){
+void funcreturn(char istruzione[2000]){
   strcat(istruzione, "@LCL\nD=M\n@5\nA=D-A\nD=M\n@R13\nM=D\n@SP\nA=M-1\nD=M\n@ARG\nA=M\nM=D\nD=A+1\n@SP\nM=D\n@LCL\nAM=M-1\nD=M\n@THAT\nM=D\n@LCL\nAM=M-1\nD=M\n@THIS\nM=D\n@LCL\nAM=M-1\nD=M\n@ARG\nM=D\n@LCL\nA=M-1\nD=M\n@LCL\nM=D\n@R13\nA=M\n0;JMP\n\0");
 }
 
 //BOOLEAN
 //costruisce la stringa dei comandi booleani
-void boolean (char istruzione[200], char* s, int* n){
+void boolean (char istruzione[2000], char* s, int* n){
   char num[6] = "\0";
   sprintf(num, "%d", *n);
   strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nD=M-D\n@");
@@ -340,10 +333,10 @@ void fill (const char *nospace, char *copier){
 
 //REMOVE COMMENTS
 //rimuove i commenti
-void remove_comment(char str[200]) {
+void remove_comment(char str[2000]) {
   char c = '/';
   int i=0;
-  while (i < 200) {
+  while (i < 2000) {
     if (str[i] == c || str[i] == '\n' || str[i] == '\r')
       str[i] = '\0';
     i = i + 1;
@@ -367,7 +360,7 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
   char num[6] = "\0";
   char memory[17];                                     //we'll put the memory address in here (static 0)
                                                       //                                             ^in questo caso 0.
-  char istruzione[200] = "\0";
+  char istruzione[2000] = "\0";
 
   printf("entrato in execute: %s\n", current->instr);
   tipo = search_symbol(current->instr, st);
@@ -399,14 +392,14 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
       strcat(istruzione, "(");
       strcat(istruzione, current->type);
       strcat(istruzione, ")");
-    }
+    }break;
 
     case 12:{
       strcat(istruzione, "@");
       strcat(istruzione, current->type);
       strcat(istruzione, "\n");
       strcat(istruzione, "0;JMP\n");
-    }
+    }break;
 
     case 13:{
       strcat(istruzione, "@SP\n");
@@ -416,20 +409,19 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
       strcat(istruzione, current->type);
       strcat(istruzione, "\n");
       strcat(istruzione, "D;JNE\n");
-    }
+    }break;
 
     case 14:{
-      find_name(current);
       function(istruzione, current);
-    }
+    }break;
 
     case 15:{
       call(istruzione, current, n);
-    }
+    }break;
 
     case 16:{
       funcreturn(istruzione);
-    }
+    }break;
 
     case -1:
     default: printf("ERROR!\n");
@@ -457,12 +449,12 @@ void filler(char* nospace, command* current_parse/*, Stack *s*/){        //writt
   int i = 0, j = 0, length_string = 0;
   char numero[20]={'\0'};                                 //empty string
   int instr = 0, type = 0, num = -2000;
-  char clean[200]={'\0'};                                 //empty cleaning string
+  char clean[2000]={'\0'};                                 //empty cleaning string
   char word[20] = {'\0'};
   //printf("%s", nospace);
 
-  memset(current_parse->instr, 0, 200);
-  memset(current_parse->type, 0, 200);
+  memset(current_parse->instr, 0, 2000);
+  memset(current_parse->type, 0, 2000);
   //you can either way put '\0' to initialize it
   //Inizialing command variables        TODO: create a methods to do it
   strcpy(current_parse->instr, "\0");                           //initialize correctly to avoid problems
@@ -584,7 +576,7 @@ remove_space(nospace);
 //PARSER
 //prepara le variabili e l'istruzione da tradurre
 command *parser(char *c/*, Stack *s*/){
-  char nospace[200];
+  char nospace[2000];
 
   //remove_space(nospace, c);                             //rimuove gli spazi
   remove_comment(c);                                      //rimuove i commenti
@@ -606,7 +598,7 @@ int main(int argc, char **argv){
   symbol table[30];
   int n = 0;
   //Stack *stack;
-  char instr[200]="\0";           //riga in questione
+  char instr[2000]="\0";           //riga in questione
 
 
   filein = fopen(argv[1], "r");     //assegnazione del file di input
