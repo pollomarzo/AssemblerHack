@@ -7,9 +7,11 @@
 
 
 /*
+LINKS:
+  => https://github.com/renlijie/nand2tetris/blob/master/projects/07/Translator.java
 PROBLEMS:
   ~> Problema nella trovare il simbolo "eq" e tutti gli altri!
-situazione:
+ACTUAL SITUATION:
   -> Push costant <numero> implementato correttamente.
   -> Add/Sub/And/etc.. implementati correttamente.
   -> Creazione di una simbol table. Per ogni tipo istruzione verrà aggiunta una funzione che ritornerà la stringa costruita
@@ -17,6 +19,8 @@ situazione:
   -> Scusami se modifico il tuo codice, da oggi non lo farò più. Prossima volta ti consiglierò il modo in cui lo implementerei io :)
   -> Più si rendono le cose automatihe più situazioni complesse rende inoffensive!
   -> Buon lavoro a domani ;)
+DIFFERENCES:
+  => Nella struttura symbol_table avrà char num[5]; (DAVID)
 
 -> Cose da fare:
   ~> implementazione stack
@@ -51,11 +55,69 @@ typedef struct command{
   int number;
 } command;
 
+//SEARCH SYMBOL
+//ricerca simbolo nella symbol table
+symbol* search_symbol (char* symb, symbol* s){
+  for (;strcmp(s->instruction, "END_OF_SYMBOL_TABLE") != 0; s++){         //finchè non arrivo alla fine del array
+    /*printf("simbolo: %s\n", symb);
+    printf("table: %s\n", s->instruction);*/
+    if (strcmp(s->instruction, symb) == 0)                              //Se instruction corrisponde allora ritorna numero
+    break;
+  }
+  return s;                                                        //ritorna num negativo (non ho trovato la stringa)
+}
+
 //POP
 //costruisce la stringa dei comandi 'pop'
-void pop_cmd (int numero, char* tipo, char istruzione[200]){
+void pop_cmd (int numero, char* segment, char istruzione[200], symbol *st){
   //char istruzione[200] = "@\0";
   //char *f = istruzione;
+  char num[7];
+  symbol *tipo;
+
+  sprintf(num, "%d", numero);
+  tipo = search_symbol(segment, st);
+  printf("TIPO POP: %d\n", tipo->num);
+
+  switch(tipo->num){
+    case 1: {                               //LOCAL
+      strcat(istruzione, "@LCL\nD=M\n@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\nD=D+A\n");
+    }break;
+
+    case 2: {                               //ARGUMENT
+      strcat(istruzione, "@ARG\nD=M\n@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\nD=D+A\n");
+    }break;
+
+    case 4: {                            //THIS
+      strcat(istruzione, "@THIS\nD=M\n@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\nD=D+A\n");
+    }break;
+
+    case 3: {                            //THAT
+      strcat(istruzione, "@THAT\nD=M\n@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\nD=D+A\n");
+    }break;
+
+    /*case 's': {
+          "@" + currFileName + "." + idx + "\n" +
+          "D=A\n"
+    }*/
+
+    case 7: {                            //TEMP
+      strcat(istruzione, "@R5\nD=M\n@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\nD=D+A\n");
+    }
+  }
+
+  strcat(istruzione, "@R13\nM=D\n@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D\n");
+  /*
   char num[7];
   sprintf(num, "%d", numero);
 
@@ -74,22 +136,57 @@ void pop_cmd (int numero, char* tipo, char istruzione[200]){
 
   printf("ISTR: %s\n", istruzione);
 
-  //return *f;
+  //return *f;*/
 }
 
 //PUSH
 //costruisce la stringa dei comandi 'push'
-void push_cmd (int numero, char* tipo, char istruzione[200]){
+void push_cmd (int numero, char* segment, char istruzione[200], symbol *st){
   //char istruzione[200] = "@\0";
   //char *f = istruzione;
   char num[7];
+  symbol *tipo;
+
+  tipo = search_symbol(segment, st);
+  printf("TIPO POP: %d\n", tipo->num);
+
   sprintf(num, "%d", numero);
 
-  switch(tipo[0]){
-    case 'c':{
+  switch(tipo->num){
+    case 5:{
       strcat(istruzione, "@");
       strcat(istruzione, num);
-      strcat(istruzione, "\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
+      strcat(istruzione, "\nD=A\n");
+    }break;
+
+    case 1: {
+      strcat(istruzione, "@LCL\nD=M\n@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\n@A=D+A\nD=M\n");;
+    }break;
+
+    case 2: {
+      strcat(istruzione, "@ARG\nD=M\n@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\n@A=D+A\nD=M\n");;
+    }break;
+
+    case 3: {
+      strcat(istruzione, "@THAT\nD=M\n@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\n@A=D+A\nD=M\n");;
+    }break;
+
+    case 4: {
+      strcat(istruzione, "@THIS\nD=M\n@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\n@A=D+A\nD=M\n");;
+    }break;
+
+    case 7: {
+      strcat(istruzione, "@R5\nD=M\n@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\n@A=D+A\nD=M\n");;
     }break;
 
     default:{
@@ -97,6 +194,7 @@ void push_cmd (int numero, char* tipo, char istruzione[200]){
       printf("ERROR!\n");
     }
   }
+  strcat(istruzione, "@SP\nA=M\nM=D\n@SP\nM=M+1\n");
 
   printf("ISTR: %s\n", istruzione);
 
@@ -148,20 +246,6 @@ void boolean (char istruzione[200], char* s, int* n){
   strcat(istruzione, ")\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
 }
 
-//SEARCH SYMBOL
-//ricerca simbolo nella symbol table
-symbol* search_symbol (char* symb, symbol* s){
-  for (;strcmp(s->instruction, "END_OF_SYMBOL_TABLE") != 0; s++){         //finchè non arrivo alla fine del array
-    printf("simbolo: %s\n", symb);
-    printf("table: %s\n", s->instruction);
-    if (strcmp(s->instruction, symb) == 0)                              //Se instruction corrisponde allora ritorna numero
-      break;
-  }
-  printf("simbolo1: %s\n", symb);
-  printf("table1: %s\n", s->instruction);
-  return s;                                                        //ritorna num negativo (non ho trovato la stringa)
-}
-
 //ADD SYMBOL
 //aggiunge i simboli alla symbol table
 void add_symbol (char* nospace, char* spec, int n, symbol* s){
@@ -190,10 +274,14 @@ void inizialize_symbol_table(symbol* st){
   add_symbol ("function", "\0", 14, st++);
   add_symbol ("call", "\0", 15, st++);
   add_symbol ("return", "\0", 16, st++);
-  add_symbol ("static", "\0", 0, st++);
-  add_symbol ("local", "\0", 1, st++);
-  add_symbol ("argument", "\0", 2, st++);
-  add_symbol ("constant", "\0", 3, st++);
+  add_symbol ("static", "\0", 0, st++);                     //TODO: find a way for static
+  add_symbol ("local", "LCL", 1, st++);
+  add_symbol ("argument", "ARG", 2, st++);
+  add_symbol ("that", "THAT", 3, st++);
+  add_symbol ("this", "THIS", 4, st++);
+  add_symbol ("constant", "\0", 5, st++);
+  add_symbol ("pointer", "\0", 6, st++);
+  add_symbol ("temp", "\0", 7, st++);
   add_symbol ("END_OF_SYMBOL_TABLE", "\0", -1, st++);
 }
 
@@ -255,11 +343,11 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
     }break;
 
     case 9:{
-
+      pop_cmd(current->number, current->type, istruzione, st);
     }break;
 
     case 10:{
-      push_cmd(current->number, current->type, istruzione);
+      push_cmd(current->number, current->type, istruzione, st);
     }break;
 
     case -1:
@@ -444,6 +532,11 @@ int main(int argc, char **argv){
   fileout = fopen(argv[2], "w");    //assegnazione del file di output
   inizialize_symbol_table(table);   //inizializza la symbol table
   fprintf(fileout, "%s", "@256\nD=A\n@SP\nM=D\n");
+  fprintf(fileout, "%s", "@1015\nD=A\n@LCL\nM=D\n");
+  fprintf(fileout, "%s", "@1527\nD=A\n@ARG\nM=D\n");
+  fprintf(fileout, "%s", "@3000\nD=A\n@THIS\nM=D\n");
+  fprintf(fileout, "%s", "@3010\nD=A\n@THAT\nM=D\n");
+  fprintf(fileout, "%s", "@5\nD=A\n@R5\nM=D\n");
   //init(stack);                          //inizializza la stack
 
 
