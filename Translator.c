@@ -153,9 +153,7 @@ void call(char istruzione[200], command *current, int *n){
   strcpy(istruzione, "@SP\nD=M\n@R13\nM=D\n@RETURN-");
   // @RET -> *SP
   strcat(istruzione, c);
-  strcat(istruzione, "\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@LCL\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n
-  @ARG\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THIS\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THAT\nD=M\n@SP\n
-  A=M\nM=D\n@SP\nM=M+1\n@R13\nD=M\n@");
+  strcat(istruzione, "\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@LCL\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@ARG\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THIS\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THAT\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@R13\nD=M\n@");
   strcat(istruzione, p);
   strcat(istruzione, "\nD=D-A\n@ARG\nM=D\n@SP\nD=M\n@LCL\nM=D\n@");
   strcat(istruzione, current->type);
@@ -163,6 +161,12 @@ void call(char istruzione[200], command *current, int *n){
   strcat(istruzione, c);
   strcat(istruzione, ")\n");
 }
+
+//FUNCRETURN
+void funcreturn(char istruzione[200]){
+  strcpy(istruzione, "@LCL\nD=M\n@5\nA=D-A\nD=M\n@R13\nM=D\n@SP\nA=M-1\nD=M\n@ARG\nA=M\nM=D\nD=A+1\n@SP\nM=D\n@LCL\nAM=M-1\nD=M\n@THAT\nM=D\n@LCL\nAM=M-1\nD=M\n@THIS\nM=D\n@LCL\nAM=M-1\nD=M\n@ARG\nM=D\n@LCL\nA=M-1\nD=M\n@LCL\nM=D\n@R13\nA=M\n0;JMP\n\0");
+}
+
 //BOOLEAN
 //costruisce la stringa dei comandi booleani
 void boolean (char istruzione[200], char* s, int* n){
@@ -333,6 +337,10 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
 
     case 15:{
       call(istruzione, current);
+    }
+
+    case 16:{
+      funcreturn(istruzione);
     }
 
     case -1:
