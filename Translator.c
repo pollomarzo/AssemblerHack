@@ -122,6 +122,47 @@ void arithmetic (char istruzione[200], char* s1, char* t, char* s2){
   strcat(istruzione, s2);
 }
 
+//FINDNAME
+void find_name(command *current){
+  while(command->type != '\0' && command->type != '\n' && command->type != '.' && command->type != ' '){
+    command->type++;
+  }
+  if (*command->type == '.') command->type++;
+}
+
+//FUNCTIONDEF
+void function(char istruzione[200], command *current){
+  strcpy(istruzione, '(');
+  strcat(istruzione, current->type);
+  strcat(istruzione, ")\n@SP\nA=M\n");
+  int i = 0;
+  while(i < current->number){
+    i = i + 1;
+    strcat(istruzione, "M=0\nA=A+1\n");
+  }
+  strcat(istruzione, "D=A\n@SP\nM=D\n");
+}
+
+//FUNCTIONCALL
+void call(char istruzione[200], command *current, int *n){
+  char c[4] = "\0\0\0\0";
+  char p[4] = "\0\0\0\0";
+  sprintf(p, "%d", current->number);
+  sprintf(c, "%d", *n);
+  // SP -> R13
+  strcpy(istruzione, "@SP\nD=M\n@R13\nM=D\n@RETURN-");
+  // @RET -> *SP
+  strcat(istruzione, c);
+  strcat(istruzione, "\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@LCL\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n
+  @ARG\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THIS\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n@THAT\nD=M\n@SP\n
+  A=M\nM=D\n@SP\nM=M+1\n@R13\nD=M\n@");
+  strcat(istruzione, p);
+  strcat(istruzione, "\nD=D-A\n@ARG\nM=D\n@SP\nD=M\n@LCL\nM=D\n@");
+  strcat(istruzione, current->type);
+  strcat(istruzione, "\n0;JMP\n(RETURN-");
+  strcat(istruzione, c);
+  strcat(istruzione, ")\n");
+}
 //BOOLEAN
 //costruisce la stringa dei comandi booleani
 void boolean (char istruzione[200], char* s, int* n){
@@ -261,6 +302,38 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
     case 10:{
       push_cmd(current->number, current->type, istruzione);
     }break;
+
+    case 11:{
+      strcat(istruzione, "(");
+      strcat(istruzione, current->type);
+      strcat(istruzione, ")");
+    }
+
+    case 12:{
+      strcat(istruzione, "@");
+      strcat(istruzione, current->type);
+      strcat(istruzione, "\n");
+      strcat(istruzione, "0;JMP\n");
+    }
+
+    case 13:{
+      strcat(istruzione, "@SP\n");
+      strcat(istruzione, "AM=M-1\n");
+      strcat(istruzione, "D=M\n");
+      strcat(istruzione, "@");
+      strcat(istruzione, current->type);
+      strcat(istruzione, "\n");
+      strcat(istruzione, "D;JNE\n");
+    }
+
+    case 14:{
+      find_name(current);
+      function(istruzione, current, n);
+    }
+
+    case 15:{
+      call(istruzione, current);
+    }
 
     case -1:
     default: printf("ERROR!\n");
