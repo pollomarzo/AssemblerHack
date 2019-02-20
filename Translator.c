@@ -11,12 +11,9 @@ PROBLEMS:
   ~> Problema nella trovare il simbolo "eq" e tutti gli altri!
 situazione:
   -> Push costant <numero> implementato correttamente.
-  -> Creazione di una simbol table. Per ogni istruzione verrà aggiunta una funzione che ritornerà la stringa costruita
-  -> Se possibile continuare facendo add, or, etc..
-  -> Per utilizzare le operazioni aritmetiche bisogna mettere i valori pushati nella stack, è essenziale formarla sennò
-      non si può capire a che numeri si riferiscono i comandi                   IMPORTANTE
-  -> Domani prova ad implementare la parte dei commandi aritmetici, copia da <push>. Essenzialmente sfrutta il fatto che
-      gli array vengono sempre passati per riferimento.
+  -> Add/Sub/And/etc.. implementati correttamente.
+  -> Creazione di una simbol table. Per ogni tipo istruzione verrà aggiunta una funzione che ritornerà la stringa costruita
+  -> Ora provo a fare il pop :)
   -> Scusami se modifico il tuo codice, da oggi non lo farò più. Prossima volta ti consiglierò il modo in cui lo implementerei io :)
   -> Più si rendono le cose automatihe più situazioni complesse rende inoffensive!
   -> Buon lavoro a domani ;)
@@ -28,9 +25,9 @@ situazione:
     => ciclo fgets                                DONE
     => remove comments and remove spaces          DONE
     => implement <push>                           DONE
-    => aggiungere la stack                        IMPORTANTE
-    => implementare arithmetic/boolean commands
-    => implementare pop command
+    => implementare arithmetic/boolean commands   DONE
+    => implementare pop command           (DAVID)
+    => implementare program flow command  (PAOLO)
   ~> STACK.c:
     => push (DAVID)                               DONE
 */
@@ -54,8 +51,30 @@ typedef struct command{
   int number;
 } command;
 
-void counter(int *n){
-  *n = *n + 1;
+//POP
+//costruisce la stringa dei comandi 'pop'
+void pop_cmd (int numero, char* tipo, char istruzione[200]){
+  //char istruzione[200] = "@\0";
+  //char *f = istruzione;
+  char num[7];
+  sprintf(num, "%d", numero);
+
+  switch(tipo[0]){
+    case 'l':{
+      strcat(istruzione, "@");
+      strcat(istruzione, num);
+      strcat(istruzione, "\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
+    }break;
+
+    default:{
+      istruzione[0] = '\0';
+      printf("ERROR!\n");
+    }
+  }
+
+  printf("ISTR: %s\n", istruzione);
+
+  //return *f;
 }
 
 //PUSH
@@ -231,34 +250,12 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
       arithmetic(istruzione, "@SP\nAM=M-1\nM=", tipo->special, "M\n@SP\nM=M+1\n");
     }break;
 
-    case 2:{                          //EQ
+    case 2:{                          //EQ, GT, LT
       boolean(istruzione, tipo->special, n);
     }break;
 
-    case 7:{                          //GT
-      sprintf(num, "%d", *n);
-      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nD=M-D\n@GT_if_");
-      strcat(istruzione, num);
-      strcat(istruzione, "\nD;JGT\nD=0\n@GT_end_");
-      strcat(istruzione, num);
-      strcat(istruzione, "\n0;JMP\n(GT_if_");
-      strcat(istruzione, num);
-      strcat(istruzione, ")\nD=-1\n(GT_end_");
-      strcat(istruzione, num);
-      strcat(istruzione, ")\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
-    }break;
+    case 9:{
 
-    case 8:{                          //LT
-      sprintf(num, "%d", *n);
-      strcat(istruzione, "@SP\nAM=M-1\nD=M\n@SP\nAM=M-1\nD=M-D\n@LT_if_");
-      strcat(istruzione, num);
-      strcat(istruzione, "\nD;JLT\nD=0\n@LT_end_");
-      strcat(istruzione, num);
-      strcat(istruzione, "\n0;JMP\n(LT_if_");
-      strcat(istruzione, num);
-      strcat(istruzione, ")\nD=-1\n(LT_end_");
-      strcat(istruzione, num);
-      strcat(istruzione, ")\n@SP\nA=M\nM=D\n@SP\nM=M+1\n");
     }break;
 
     case 10:{
