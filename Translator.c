@@ -10,7 +10,6 @@
 LINKS:
   => https://github.com/renlijie/nand2tetris/blob/master/projects/07/Translator.java
 PROBLEMS:
-  ~> Problema nella trovare il simbolo "eq" e tutti gli altri!
 ACTUAL SITUATION:
   -> Push costant <numero> implementato correttamente.
   -> Add/Sub/And/etc.. implementati correttamente.
@@ -32,6 +31,7 @@ DIFFERENCES:
     => implementare arithmetic/boolean commands   DONE
     => implementare pop command           (DAVID)
     => implementare program flow command  (PAOLO)
+    => implementare static, pointer       (DAVID)
   ~> STACK.c:
     => push (DAVID)                               DONE
 */
@@ -162,31 +162,31 @@ void push_cmd (int numero, char* segment, char istruzione[200], symbol *st){
     case 1: {
       strcat(istruzione, "@LCL\nD=M\n@");
       strcat(istruzione, num);
-      strcat(istruzione, "\n@A=D+A\nD=M\n");;
+      strcat(istruzione, "\nA=D+A\nD=M\n");;
     }break;
 
     case 2: {
       strcat(istruzione, "@ARG\nD=M\n@");
       strcat(istruzione, num);
-      strcat(istruzione, "\n@A=D+A\nD=M\n");;
+      strcat(istruzione, "\nA=D+A\nD=M\n");;
     }break;
 
     case 3: {
       strcat(istruzione, "@THAT\nD=M\n@");
       strcat(istruzione, num);
-      strcat(istruzione, "\n@A=D+A\nD=M\n");;
+      strcat(istruzione, "\nA=D+A\nD=M\n");;
     }break;
 
     case 4: {
       strcat(istruzione, "@THIS\nD=M\n@");
       strcat(istruzione, num);
-      strcat(istruzione, "\n@A=D+A\nD=M\n");;
+      strcat(istruzione, "\nA=D+A\nD=M\n");;
     }break;
 
     case 7: {
       strcat(istruzione, "@R5\nD=M\n@");
       strcat(istruzione, num);
-      strcat(istruzione, "\n@A=D+A\nD=M\n");;
+      strcat(istruzione, "\nA=D+A\nD=M\n");;
     }break;
 
     default:{
