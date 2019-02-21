@@ -29,7 +29,7 @@ DIFFERENCES:
     => remove comments and remove spaces          DONE
     => implement <push>                           DONE
     => implementare arithmetic/boolean commands   DONE
-    => implementare pop command           (DAVID)
+    => implementare pop command           (DAVID) DONE
     => implementare program flow command  (PAOLO)
     => implementare static, pointer       (DAVID)
   ~> STACK.c:
@@ -80,40 +80,35 @@ void pop_cmd (int numero, char* segment, char istruzione[200], symbol *st){
   printf("TIPO POP: %d\n", tipo->num);
 
   switch(tipo->num){
-    case 1: {                               //LOCAL
-      strcat(istruzione, "@LCL\nD=M\n@");
+    case 1:                                       //LOCAL
+    case 2:                                       //ARGUMENT
+    case 3:                                       //THAT
+    case 4:                                       //THIS
+    case 5: {                                     //TEMP
+      strcat(istruzione, "@");
+      strcat(istruzione, tipo->special);
+      strcat(istruzione, "\nD=M\n@");
       strcat(istruzione, num);
       strcat(istruzione, "\nD=D+A\n");
     }break;
 
-    case 2: {                               //ARGUMENT
-      strcat(istruzione, "@ARG\nD=M\n@");
-      strcat(istruzione, num);
-      strcat(istruzione, "\nD=D+A\n");
+    case 6: {                                     //POINTER
+      strcat(istruzione, "@");
+      if (strcmp(num, "0") == 0)
+        strcat(istruzione, "THIS");
+      else
+        strcat(istruzione, "THAT");
+      strcat(istruzione, "\nD=A\n");
     }break;
 
-    case 4: {                            //THIS
-      strcat(istruzione, "@THIS\nD=M\n@");
+    case 7: {                                     //STATIC
+      strcat(istruzione, "@");
+      strcat(istruzione, tipo->special);
+      strcat(istruzione, "_");
       strcat(istruzione, num);
-      strcat(istruzione, "\nD=D+A\n");
+      strcat(istruzione, "\nD=A\n");
     }break;
 
-    case 3: {                            //THAT
-      strcat(istruzione, "@THAT\nD=M\n@");
-      strcat(istruzione, num);
-      strcat(istruzione, "\nD=D+A\n");
-    }break;
-
-    /*case 's': {
-          "@" + currFileName + "." + idx + "\n" +
-          "D=A\n"
-    }*/
-
-    case 7: {                            //TEMP
-      strcat(istruzione, "@R5\nD=M\n@");
-      strcat(istruzione, num);
-      strcat(istruzione, "\nD=D+A\n");
-    }
   }
 
   strcat(istruzione, "@R13\nM=D\n@SP\nAM=M-1\nD=M\n@R13\nA=M\nM=D\n");
@@ -153,40 +148,39 @@ void push_cmd (int numero, char* segment, char istruzione[2000], symbol *st){
   sprintf(num, "%d", numero);
 
   switch(tipo->num){
-    case 5:{
+    case 0:{                                      //COSTANT
       strcat(istruzione, "@");
       strcat(istruzione, num);
       strcat(istruzione, "\nD=A\n");
     }break;
 
-    case 1: {
-      strcat(istruzione, "@LCL\nD=M\n@");
+    case 1:                                       //LOCAL
+    case 2:                                       //ARGUMENT
+    case 3:                                       //THAT
+    case 4:                                       //THIS
+    case 5: {                                     //TEMP
+      strcat(istruzione, "@");
+      strcat(istruzione, tipo->special);
+      strcat(istruzione, "\nD=M\n@");
       strcat(istruzione, num);
       strcat(istruzione, "\nA=D+A\nD=M\n");;
     }break;
 
-    case 2: {
-      strcat(istruzione, "@ARG\nD=M\n@");
-      strcat(istruzione, num);
-      strcat(istruzione, "\nA=D+A\nD=M\n");;
+    case 6: {                                     //POINTER
+      strcat(istruzione, "@");
+      if (strcmp(num, "0") == 0)
+        strcat(istruzione, "THIS");
+      else
+        strcat(istruzione, "THAT");
+      strcat(istruzione, "\nD=M\n");
     }break;
 
-    case 3: {
-      strcat(istruzione, "@THAT\nD=M\n@");
+    case 7: {                                     //STATIC
+      strcat(istruzione, "@");
+      strcat(istruzione, tipo->special);
+      strcat(istruzione, "_");
       strcat(istruzione, num);
-      strcat(istruzione, "\nA=D+A\nD=M\n");;
-    }break;
-
-    case 4: {
-      strcat(istruzione, "@THIS\nD=M\n@");
-      strcat(istruzione, num);
-      strcat(istruzione, "\nA=D+A\nD=M\n");;
-    }break;
-
-    case 7: {
-      strcat(istruzione, "@R5\nD=M\n@");
-      strcat(istruzione, num);
-      strcat(istruzione, "\nA=D+A\nD=M\n");;
+      strcat(istruzione, "\nD=M\n");
     }break;
 
     default:{
@@ -294,7 +288,7 @@ void add_symbol (char* nospace, char* spec, int n, symbol* s){
 
 //INIZIALIZE SYMBOL TABLE
 //inizializza la symbol table
-void inizialize_symbol_table(symbol* st){
+void inizialize_symbol_table(symbol* st, char* currFileName){
   add_symbol ("add", "+", 0, st++);
   add_symbol ("sub", "-", 0, st++);
   add_symbol ("and", "&", 0, st++);
@@ -312,14 +306,14 @@ void inizialize_symbol_table(symbol* st){
   add_symbol ("function", "\0", 14, st++);
   add_symbol ("call", "\0", 15, st++);
   add_symbol ("return", "\0", 16, st++);
-  add_symbol ("static", "\0", 0, st++);                     //TODO: find a way for static
+  add_symbol ("constant", "\0", 0, st++);
   add_symbol ("local", "LCL", 1, st++);
   add_symbol ("argument", "ARG", 2, st++);
   add_symbol ("that", "THAT", 3, st++);
   add_symbol ("this", "THIS", 4, st++);
-  add_symbol ("constant", "\0", 5, st++);
+  add_symbol ("temp", "R5", 5, st++);
   add_symbol ("pointer", "\0", 6, st++);
-  add_symbol ("temp", "\0", 7, st++);
+  add_symbol ("static", currFileName, 7, st++);                     //TODO: find a way for static
   add_symbol ("END_OF_SYMBOL_TABLE", "\0", -1, st++);
 }
 
@@ -391,7 +385,7 @@ void execute(FILE *fileout, command *current, symbol *st, int *n){
     case 11:{
       strcat(istruzione, "(");
       strcat(istruzione, current->type);
-      strcat(istruzione, ")");
+      strcat(istruzione, ")\n");
     }break;
 
     case 12:{
@@ -603,7 +597,7 @@ int main(int argc, char **argv){
 
   filein = fopen(argv[1], "r");     //assegnazione del file di input
   fileout = fopen(argv[2], "w");    //assegnazione del file di output
-  inizialize_symbol_table(table);   //inizializza la symbol table
+  inizialize_symbol_table(table, argv[1]);   //inizializza la symbol table
   fprintf(fileout, "%s", "@256\nD=A\n@SP\nM=D\n");
   fprintf(fileout, "%s", "@1015\nD=A\n@LCL\nM=D\n");
   fprintf(fileout, "%s", "@1527\nD=A\n@ARG\nM=D\n");
