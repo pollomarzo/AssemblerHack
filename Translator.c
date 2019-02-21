@@ -599,13 +599,13 @@ int main(int argc, char **argv){
   fileout = fopen(argv[2], "w");    //assegnazione del file di output
   inizialize_symbol_table(table, argv[1]);   //inizializza la symbol table
   fprintf(fileout, "%s", "@256\nD=A\n@SP\nM=D\n");
-  fprintf(fileout, "%s", "@1015\nD=A\n@LCL\nM=D\n");
+  /*fprintf(fileout, "%s", "@1015\nD=A\n@LCL\nM=D\n");
   fprintf(fileout, "%s", "@1527\nD=A\n@ARG\nM=D\n");
   fprintf(fileout, "%s", "@3000\nD=A\n@THIS\nM=D\n");
   fprintf(fileout, "%s", "@3010\nD=A\n@THAT\nM=D\n");
   fprintf(fileout, "%s", "@5\nD=A\n@R5\nM=D\n");
   //init(stack);                          //inizializza la stack
-
+*/
 
   while(fgets(instr, sizeof(instr), filein)!=NULL){         //while ci sono righe di grandezza massima 'instr' nel file 'filein'. Se ci sono assegnarle alla variabile (instr).
     printf("CURRENT INSTRUCTION: %s\n", instr);
